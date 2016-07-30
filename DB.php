@@ -29,18 +29,22 @@ class DB{
 	}	
 	
 	public static function query($sql,$array=[]){//下SQL語法
+		ob_start();
+		
 		try{	
-			if(self::$connect===null)new self;	
+			if(self::$connect===null)new self;			
 			$query=self::$connect->prepare($sql);		
 			$query->execute($array);
 		}catch(PDOException $e){
 			error_log($e);//getMessage,getTrace
 		}
 		
-		// ob_start();
-		// $error_log=ob_get_contents();
-		// error_log($error_log);
-		// ob_end_clean();
+		$error_log=ob_get_contents();
+		if($error_log){
+			error_log($error_log);
+			self::$connect=null;
+		}
+		ob_end_clean();
 		
 		return $query;
 	}
