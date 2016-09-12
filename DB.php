@@ -2,17 +2,13 @@
 class DB{
 	//use Singleton pattern 
 	public static $connect=null;
-	private static $config=[
+	public static $config=[
 		'dbName'=>'test',
 		'user'=>'user',
 		'password'=>'password',
 		'host'=>'127.0.0.1',
 	];
-	public static function set_config($config){
-		foreach($config as $key=>$val){
-			self::$config[$key]=$val;
-		}
-	}
+	
 	private function __construct(){
 		$dbName=self::$config['dbName'];
 		$user=self::$config['user'];
