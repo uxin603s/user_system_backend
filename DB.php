@@ -14,33 +14,37 @@ class DB{
 		$user=self::$config['user'];
 		$password=self::$config['password'];
 		$host=self::$config['host'];
-		$pdo_set=[
+		$config=[
 			PDO::ATTR_PERSISTENT => true,//持久連線(初始化就要使用不然會無效)
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 			// PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING,
 		];
 		$pdo_string="mysql:host={$host};dbname={$dbName}";
-		
-		self::$connect=new PDO($pdo_string,$user,$password,$pdo_set);	
+		try{	
+			self::$connect=new PDO($pdo_string,$user,$password,$config);
+		}catch(PDOException $e){  
+			error_log($e);//getMessage,getTrace
+			exit;
+		}
 	}	
 	
 	public static function query($sql,$array=[]){//下SQL語法
 		ob_start();
-		
 		try{	
-			if(self::$connect===null)new self;			
+			if(self::$connect===null)new self;		
 			$query=self::$connect->prepare($sql);		
 			$query->execute($array);
 		}catch(PDOException $e){
 			error_log($e);//getMessage,getTrace
 		}
-		
+		ob_end_clean();
 		$error_log=ob_get_contents();
+		
 		if($error_log){
 			error_log($error_log);
 			self::$connect=null;
 		}
-		ob_end_clean();
+		
 		
 		return $query;
 	}
