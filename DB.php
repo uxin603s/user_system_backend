@@ -43,6 +43,9 @@ class DB{
 	}
 	
 	public static function select($sql,$array=[]){//查詢
+		if(!is_array($array)){
+			$array=[$array];
+		}
 		$query=self::query($sql,$array);
 		$query->setFetchMode(PDO::FETCH_ASSOC);
 		$data=$query->fetchAll();
