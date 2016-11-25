@@ -69,23 +69,13 @@ class DB{
 		if(!is_array($insert) || !$table_name)return false;
 		$fields=[];
 		$values=[];
-		if(isset($insert[0])){
-			foreach($insert as $key=>$item){
-				$values[]="(".implode(',',array_fill(0,count($item),'?')).")";
-				foreach($item as $field=>$value){
-					if($key==0){
-						$fields[]="`{$field}`";
-					}
-					$bind_data[]=$value;
-				}
-			}
-		}else{
-			foreach($insert as $field=>$value){
-				$fields[]="`{$field}`";
-				$bind_data[]=$value;
-			}
-			$values[]="(".implode(',',array_fill(0,count($insert),'?')).")";
+		
+		foreach($insert as $field=>$value){
+			$fields[]="`{$field}`";
+			$bind_data[]=$value;
 		}
+		$values[]="(".implode(',',array_fill(0,count($insert),'?')).")";
+		
 		
 		$field_str=implode(',',$fields);
 		$value_str=implode(',',$values);
@@ -93,12 +83,12 @@ class DB{
 		$sql="insert into `{$table_name}` ({$field_str}) values {$value_str}";
 		$query=self::query($sql,$bind_data);
 		
-		if(!isset($insert[0])){
-			if(self::$connect->lastInsertId()){
-				return self::$connect->lastInsertId();
-			}
+		
+		if(self::$connect->lastInsertId()){
+			return self::$connect->lastInsertId();
 		}
-		return $query->rowCount();
+		
+		return ($query->rowCount())?true:false;
 	}
 	
 	public static function update($update,$where,$table_name=""){//修改
