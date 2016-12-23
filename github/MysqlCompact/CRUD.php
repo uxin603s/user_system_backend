@@ -1,5 +1,8 @@
 <?php
 trait CRUD{
+	public static function flushCache(){
+		
+	}
 	public static function filter_field($list){
 		if($list && is_array($list)){
 			foreach($list as $field=>$value){
@@ -81,6 +84,7 @@ trait CRUD{
 	}
 	
 	public static function insert($insert){
+		
 		$insert=self::filter_field($insert);
 		if($id=DB::insert($insert,self::$table)){
 			if(is_numeric($id)){
@@ -88,6 +92,7 @@ trait CRUD{
 			}
 			$status=true;
 			$message="新增成功";
+			self::flush();
 		}else{
 			$status=false;
 			$message="新增失敗";
@@ -101,6 +106,7 @@ trait CRUD{
 		if(DB::update($arg['update'],$arg['where'],self::$table)){
 			$status=true;
 			$message="修改成功";
+			self::flush();
 		}else{
 			$status=false;
 			$message="修改失敗";
@@ -112,6 +118,7 @@ trait CRUD{
 		if(DB::delete($where,self::$table)){
 			$status=true;
 			$message="刪除成功";
+			self::flush();
 		}else{
 			$status=false;
 			$message="刪除失敗";

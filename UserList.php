@@ -6,6 +6,36 @@ class UserList{
 		CRUD::insert as tmp_insert;
 		CRUD::update as tmp_update;
 	}
+	public static function flushCache(){
+		$where_list=[
+			['field'=>'status','type'=>0,'value'=>1],
+		];
+		
+		$tmp=self::getList(compact(['where_list']));
+		$UserList=[];
+		$access_token=[];
+		if($tmp['status']){	
+			foreach($tmp['list'] as $item){
+				$UserList[$item['id']]=[
+					'id'=>$item['id'],
+					'name'=>$item['name'],
+				];
+				$access_token[$item['access_token']]=$item;
+			}
+		}
+		FlushCache::run("UserList",$UserList,1);
+		FlushCache::run("access_token",$access_token,1);
+	}
+	public static function getAccessToken(){
+		do{
+			$access_token=md5(time());
+			$where_list=[
+				['field'=>'access_token','type'=>0,'value'=>$access_token],
+			];
+			$result=self::getList(compact(['where_list']));
+		}while($result['status']);
+		return $access_token;
+	}
 	// public static function update($arg){
 		// if(isset($arg['update']['access_token']) && isset($arg['where']['id'])){
 			// $access_token=md5($arg['where']['id'].time());
@@ -17,17 +47,17 @@ class UserList{
 		$arg['created_time_int']=time();
 		
 		$result=self::tmp_insert($arg);
-		do{
-			$access_token=md5($arg['name'].time());
-			$update=[
-				'fb_id'=>$result['insert']['id'],
-				'access_token'=>$access_token,
-			];
-			$where=[
-				'id'=>$result['insert']['id'],
-			];
-			$update_result=self::update(compact(['update','where']));
-		}while(!$update_result['status']);
+		
+		$access_token=getAccessToken();
+		$update=[
+			'fb_id'=>$result['insert']['id'],
+			'access_token'=>$access_token,
+		];
+		$where=[
+			'id'=>$result['insert']['id'],
+		];
+		$update_result=self::update(compact(['update','where']));
+		
 		
 		$result['insert']['access_token']=$access_token;
 		$result['insert']['fb_id']=$result['insert']['id'];
