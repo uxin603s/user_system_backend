@@ -14,11 +14,12 @@ function getSession($access_token=false,$location='index.php'){
 	//寫session
 	//轉到設定
 	header("location:{$location}");
+	// var_dump($_GET['goto']);
 	exit;
 }
 $hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
 
-if(in_array(gethostname(),$hostname){
+if(in_array(gethostname(),$hostname)){
 	getSession();
 }
 
@@ -29,7 +30,11 @@ $client_id=$FB['id'];
 $client_secret=$FB['secret'];
 //需要寫導頁
 
-$redirect_uri=urlencode("http://{$_SERVER['HTTP_HOST']}/login.php?goto={$_GET['goto']}");
+$redirect_uri="http://{$_SERVER['HTTP_HOST']}/login.php";
+if(isset($_GET['goto'])){
+	$redirect_uri.="?goto={$_GET['goto']}";
+}
+$redirect_uri=urlencode($redirect_uri);
 
 if(isset($_GET['code'])){
 	$url="https://graph.facebook.com/oauth/access_token?client_id={$client_id}&client_secret={$client_secret}&code={$_GET['code']}&redirect_uri={$redirect_uri}";
@@ -56,7 +61,12 @@ if(isset($_GET['code'])){
 			getSession();
 		}else{
 			if($tmp=DB::select("select * from user where fb_id = ?",[$data['id']])){
-				getSession($tmp[0]['access_token'],"");
+				if(isset($_GET['goto'])){
+					$goto="{$_GET['goto']}&access_token={$tmp[0]['access_token']}";
+				}else{
+					$goto="index.php";
+				}
+				getSession($tmp[0]['access_token'],$goto);
 			}
 		}
 		

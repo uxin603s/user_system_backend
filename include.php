@@ -20,7 +20,4 @@ include_once __DIR__."/RoleData.php";
 include_once __DIR__."/UserRole.php";
 
 Mcache::$prefix="cfd_chichi_user";
-
-// ob_start();
-// DB::$config=json_decode(file_get_contents(__DIR__."/config/DB.json"),1);
-// ob_get_clean();
+DB::query("SET NAMES utf8");

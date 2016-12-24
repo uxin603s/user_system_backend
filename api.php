@@ -9,6 +9,7 @@ include_once __DIR__."/include.php";
 // RoleList::flushCache();
 // RoleData::flushCache();
 // DataList::flushCache();
+// exit;
 //ip和hostname改成讀config
 $ip=json_decode(file_get_contents(__DIR__."/config/ip.json"),1);
 $hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
