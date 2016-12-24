@@ -2,14 +2,10 @@
 class DB{
 	//use Singleton pattern 
 	public static $connect=null;
-	public static $config=[
-		'dbName'=>'test',
-		'user'=>'user',
-		'password'=>'password',
-		'host'=>'127.0.0.1',
-	];
+	public static $config=[];
 	
 	private function __construct(){
+		self::$config=file_get_contents(__DIR__."/DB.json");
 		$dbName=self::$config['dbName'];
 		$user=self::$config['user'];
 		$password=self::$config['password'];
@@ -26,6 +22,7 @@ class DB{
 			error_log($e);//getMessage,getTrace
 			exit;
 		}
+		// errorInfo()
 	}	
 	
 	public static function query($sql,$array=[]){//下SQL語法

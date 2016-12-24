@@ -16,7 +16,7 @@ function getSession($uid,$location='index.php'){
 	exit;
 }
 
-if(gethostname()=="chichi"){
+if(in_array(gethostname(),["sheepskinwolf.com","chichi"])){
 	getSession(0);
 }
 
