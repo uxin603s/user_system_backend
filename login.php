@@ -28,7 +28,8 @@ ob_get_clean();
 $client_id=$FB['id'];
 $client_secret=$FB['secret'];
 //需要寫導頁
-$redirect_uri=urlencode("http://{$_SERVER['HTTP_HOST']}/login.php");
+
+$redirect_uri=urlencode("http://{$_SERVER['HTTP_HOST']}/login.php?goto={$_GET['goto']}");
 
 if(isset($_GET['code'])){
 	$url="https://graph.facebook.com/oauth/access_token?client_id={$client_id}&client_secret={$client_secret}&code={$_GET['code']}&redirect_uri={$redirect_uri}";
@@ -55,7 +56,7 @@ if(isset($_GET['code'])){
 			getSession();
 		}else{
 			if($tmp=DB::select("select * from user where fb_id = ?",[$data['id']])){
-				getSession($tmp[0]['access_token']);
+				getSession($tmp[0]['access_token'],"");
 			}
 		}
 		
