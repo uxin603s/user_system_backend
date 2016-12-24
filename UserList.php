@@ -71,13 +71,18 @@ class UserList{
 				$result['data']=[];
 				$result['role']=[];
 				$result['role_user']=[];
+				$result['web']=[];
 				foreach($result['rid'] as $rid){
 					if($RoleData=FlushCache::get("RoleData",$rid)){
 						$result['data'][$rid]=$RoleData;
 					}
 					if($RoleList=FlushCache::get("RoleList",$rid)){
 						$result['role'][$rid]=$RoleList;
+						if($WebList=FlushCache::get("WebList",$RoleList['wid'])){
+							$result['web'][$rid][]=$WebList;
+						}
 					}
+					
 					$RoleUser=[];
 					if($tmp=FlushCache::get("RoleUser",$rid)){
 						foreach($tmp as $uid){
@@ -91,7 +96,8 @@ class UserList{
 					
 				}
 				if(in_array(0,$result['rid'])){
-					$result['all_user']=FlushCache::get_all("UserList");
+					$result['role_user'][-1]=FlushCache::get_all("UserList");
+					$result['web'][-1]=FlushCache::get_all("WebList");;
 				}
 			}
 		}

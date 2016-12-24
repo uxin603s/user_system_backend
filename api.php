@@ -3,13 +3,6 @@ include_once __DIR__."/include.php";
 // header("")
 // file_get_contents("http://user.cfd888.info/login.php")
 
-//快取初始化
-// UserRole::flushCache();
-// UserList::flushCache();
-// RoleList::flushCache();
-// RoleData::flushCache();
-// DataList::flushCache();
-// exit;
 //ip和hostname改成讀config
 $ip=json_decode(file_get_contents(__DIR__."/config/ip.json"),1);
 $hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
@@ -38,6 +31,9 @@ if($tmp=Mcache::get($memcache_key_count)){
 
 if($login_try<3 && mb_strlen($_GET['access_token'])==32 && preg_match("/^[a-z0-9]+$/",$_GET['access_token'])){
 	$data=UserList::compactUser($_GET['access_token']);
+	echo "<pre>";
+	var_dump($data);
+	exit;
 	$status=true;
 	$message="成功取得資料";
 	Mcache::$con->set($memcache_key_count,0);
