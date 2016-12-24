@@ -1,9 +1,6 @@
 <?php
 include_once __DIR__."/include.php";
-// header("")
-// file_get_contents("http://user.cfd888.info/login.php")
 
-//ip和hostname改成讀config
 $ip=json_decode(file_get_contents(__DIR__."/config/ip.json"),1);
 $hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
 $white_list=[
