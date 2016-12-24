@@ -3,8 +3,9 @@
 class Fcache{
 	//存入的路徑設定
 
-	public static $path=__DIR__."/.Fcache/";
+	public static $path;
 	private function __construct(){
+		self::$path=__DIR__."/.Fcache/";
 		if(empty(self::$path)){
 			throw Exception("need set path");
 		}
