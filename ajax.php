@@ -5,7 +5,7 @@ include_once __DIR__."/include.php";
 session_start();
 session_write_close();
 
-if(isset($_SESSION['uid']) && $_SESSION['uid']==0){
+if(isset($_SESSION['rid']) && in_array(0,$_SESSION['rid'])){
 	
 }else{
 	$status=false;

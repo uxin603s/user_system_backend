@@ -13,7 +13,8 @@ class UserRole{
 				$RoleUser[$item['rid']][]=$item['uid'];
 			}
 		}
-		FlushCache::run("UserRole",$UserRole,1);
-		FlushCache::run("RoleUser",$RoleUser,1);
+		
+		FlushCache::run("UserRole",$UserRole);
+		FlushCache::run("RoleUser",$RoleUser);
 	}
 }

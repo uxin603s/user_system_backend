@@ -4,7 +4,7 @@ class UserList{
 	public static $filter_field_arr=['id','name','status','fb_id','created_time_int','access_token'];
 	use CRUD{
 		CRUD::insert as tmp_insert;
-		CRUD::update as tmp_update;
+		// CRUD::update as tmp_update;
 	}
 	public static function flushCache(){
 		$where_list=[
@@ -23,8 +23,8 @@ class UserList{
 				$access_token[$item['access_token']]=$item;
 			}
 		}
-		FlushCache::run("UserList",$UserList,1);
-		FlushCache::run("access_token",$access_token,1);
+		FlushCache::run("UserList",$UserList);
+		FlushCache::run("access_token",$access_token);
 	}
 	public static function getAccessToken(){
 		do{
@@ -61,6 +61,40 @@ class UserList{
 		
 		$result['insert']['access_token']=$access_token;
 		$result['insert']['fb_id']=$result['insert']['id'];
+		return $result;
+	}
+	public static function compactUser($access_token){
+		
+		if($result=FlushCache::get("access_token",$access_token)){
+			if($tmp=FlushCache::get("UserRole",$result['id'])){
+				$result['rid']=$tmp;
+				$result['data']=[];
+				$result['role']=[];
+				$result['role_user']=[];
+				foreach($result['rid'] as $rid){
+					if($RoleData=FlushCache::get("RoleData",$rid)){
+						$result['data'][$rid]=$RoleData;
+					}
+					if($RoleList=FlushCache::get("RoleList",$rid)){
+						$result['role'][$rid]=$RoleList;
+					}
+					$RoleUser=[];
+					if($tmp=FlushCache::get("RoleUser",$rid)){
+						foreach($tmp as $uid){
+							if($UserList=FlushCache::get("UserList",$uid)){
+								$RoleUser[]=$UserList;
+							}
+						}
+					}
+					
+					$result['role_user'][$rid]=$RoleUser;
+					
+				}
+				if(in_array(0,$result['rid'])){
+					$result['all_user']=FlushCache::get_all("UserList");
+				}
+			}
+		}
 		return $result;
 	}
 }

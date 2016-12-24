@@ -92,7 +92,7 @@ trait CRUD{
 			}
 			$status=true;
 			$message="新增成功";
-			self::flush();
+			self::flushCache();
 		}else{
 			$status=false;
 			$message="新增失敗";
@@ -106,7 +106,7 @@ trait CRUD{
 		if(DB::update($arg['update'],$arg['where'],self::$table)){
 			$status=true;
 			$message="修改成功";
-			self::flush();
+			self::flushCache();
 		}else{
 			$status=false;
 			$message="修改失敗";
@@ -118,7 +118,7 @@ trait CRUD{
 		if(DB::delete($where,self::$table)){
 			$status=true;
 			$message="刪除成功";
-			self::flush();
+			self::flushCache();
 		}else{
 			$status=false;
 			$message="刪除失敗";

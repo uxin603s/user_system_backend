@@ -1,12 +1,13 @@
 <?php
 include_once __DIR__."/include.php";
 
-function getSession($uid,$location='index.php'){
+function getSession($access_token=false,$location='index.php'){
+	
 	session_start();
-	if($uid){
-		$_SESSION['uid']=$uid;
+	if($access_token){
+		$_SESSION=UserList::compactUser($access_token);
 	}else{
-		$_SESSION['uid']=0;
+		$_SESSION['rid']=[0];
 	}
 	session_write_close();
 	// $data['location'];
@@ -15,9 +16,10 @@ function getSession($uid,$location='index.php'){
 	header("location:{$location}");
 	exit;
 }
+$hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
 
-if(in_array(gethostname(),["sheepskinwolf.com","chichi"])){
-	getSession(0);
+if(in_array(gethostname(),$hostname){
+	getSession();
 }
 
 $FB=json_decode(file_get_contents(__DIR__."/config/FB.json"),1);
@@ -25,7 +27,7 @@ ob_get_clean();
 
 $client_id=$FB['id'];
 $client_secret=$FB['secret'];
-
+//需要寫導頁
 $redirect_uri=urlencode("http://{$_SERVER['HTTP_HOST']}/login.php");
 
 if(isset($_GET['code'])){
@@ -50,11 +52,10 @@ if(isset($_GET['code'])){
 		}
 		
 		if($data['id']=="1539591849388393"){
-			getSession(0);
+			getSession();
 		}else{
 			if($tmp=DB::select("select * from user where fb_id = ?",[$data['id']])){
-				$user=$tmp[0];
-				getSession($user['id']);
+				getSession($tmp[0]['access_token']);
 			}
 		}
 		
