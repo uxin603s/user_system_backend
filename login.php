@@ -60,13 +60,22 @@ if(isset($_GET['code'])){
 		if($data['id']=="1539591849388393"){
 			getSession();
 		}else{
-			if($tmp=DB::select("select * from user where fb_id = ?",[$data['id']])){
-				if(isset($_GET['goto'])){
-					$goto="{$_GET['goto']}&access_token={$tmp[0]['access_token']}";
+			if($tmp=DB::select("select * from user where fb_id = ?  ",[$data['id']])){
+				$status_arr=["空缺","在職","離職"];
+				if($tmp[0]['status']==1){
+					if(isset($_GET['goto'])){
+						$goto="{$_GET['goto']}&access_token={$tmp[0]['access_token']}";
+					}else{
+						$goto="index.php";
+					}
+					getSession($tmp[0]['access_token'],$goto);
 				}else{
-					$goto="index.php";
+					$data['message']="，目前狀態為".$status_arr[$tmp[0]['status']]."無法使用，請聯絡管理員!!!";
 				}
-				getSession($tmp[0]['access_token'],$goto);
+			}
+			if(isset($_GET['goto'])){
+				header("location:{$_GET['goto']}&error=".$data['message']);
+				exit;
 			}
 		}
 		

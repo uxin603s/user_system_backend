@@ -90,10 +90,8 @@ class UserList{
 								$RoleUser[]=$UserList;
 							}
 						}
-					}
-					
+					}					
 					$result['role_user'][$rid]=$RoleUser;
-					
 				}
 				if(in_array(0,$result['rid'])){
 					$result['role_user'][-1]=FlushCache::get_all("UserList");
