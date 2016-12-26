@@ -14,7 +14,8 @@ class UserRole{
 			}
 		}
 		
-		FlushCache::run("UserRole",$UserRole);
-		FlushCache::run("RoleUser",$RoleUser);
+		Cache::run("UserRole",$UserRole);
+		Cache::run("RoleUser",$RoleUser);
+		UserList::reset_session();
 	}
 }

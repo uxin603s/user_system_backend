@@ -25,7 +25,7 @@ trait CRUD{
 		}
 		return $list;
 	}
-	public static function getList($arg){
+	public static function getList($arg=null){
 		$bind_data=[];		
 		$select_str_arr=[];
 		if($arg['select_list']){

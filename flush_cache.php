@@ -1,9 +1,12 @@
 <?php
 include_once __DIR__."/include.php";
-//§Ö¨úªì©l¤Æ
+//å¿«å–åˆå§‹åŒ–
+
 UserRole::flushCache();
 UserList::flushCache();
 RoleList::flushCache();
 RoleData::flushCache();
 DataList::flushCache();
 WebList::flushCache();
+
+UserList::reset_session();

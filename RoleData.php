@@ -13,6 +13,7 @@ class RoleData{
 				}
 			}		
 		}
-		FlushCache::run("RoleData",$RoleData,1);
+		Cache::run("RoleData",$RoleData,1);
+		UserList::reset_session();
 	}
 }

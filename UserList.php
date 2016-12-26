@@ -101,4 +101,28 @@ class UserList{
 		}
 		return $result;
 	}
+	public static function remember($access_token,$data){
+		if($access_token){
+			Fcache::set("userSystem_{$access_token}",$data);
+		}
+	}
+	public static function reset_session(){
+		$tmp_session_id=session_id();
+		if($list=Fcache::where("userSystem_")){
+			foreach($list as $val){
+				$access_token=$val['access_token'];
+				$session_id=$val['session_id'];
+				session_id($session_id);
+				session_start();
+				$_SESSION=self::compactUser($access_token);
+				$_SESSION['session_id']=$session_id;
+				self::remember($access_token,$_SESSION);
+				session_write_close();
+			}
+		}
+		session_id($tmp_session_id);
+		session_start();
+		session_write_close();
+	}
+	
 }
