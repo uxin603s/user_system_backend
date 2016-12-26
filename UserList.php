@@ -36,12 +36,6 @@ class UserList{
 		}while($result['status']);
 		return $access_token;
 	}
-	// public static function update($arg){
-		// if(isset($arg['update']['access_token']) && isset($arg['where']['id'])){
-			// $access_token=md5($arg['where']['id'].time());
-		// }
-		// return self::tmp_update($arg);
-	// }
 	public static function insert($arg){
 		$arg['status']=0;
 		$arg['created_time_int']=time();
@@ -79,7 +73,7 @@ class UserList{
 					if($RoleList=Cache::get_one("RoleList",$rid)){
 						$result['role'][$rid]=$RoleList;
 						if($WebList=Cache::get_one("WebList",$RoleList['wid'])){
-							$result['web'][$rid][]=$WebList;
+							$result['web'][$rid][$RoleList['wid']]=$WebList;
 						}
 					}
 					
@@ -94,8 +88,8 @@ class UserList{
 					$result['role_user'][$rid]=$RoleUser;
 				}
 				if(in_array(0,$result['rid'])){
-					$result['role_user'][-1]=Cache::get_all("UserList");
-					$result['web'][-1]=Cache::get_all("WebList");;
+					$result['role_user'][0]=Cache::get_all("UserList");
+					$result['web'][0]=Cache::get_all("WebList");;
 				}
 			}
 		}

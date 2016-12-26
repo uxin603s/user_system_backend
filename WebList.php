@@ -6,7 +6,7 @@ class WebList{
 	public static function flushCache(){
 		$tmp=self::getList(null);
 		$WebList=[];
-		if($tmp['status']){	
+		if($tmp['status']){
 			foreach($tmp['list'] as $item){
 				$WebList[$item['id']]=$item;
 			}
