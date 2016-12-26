@@ -26,6 +26,7 @@ class DB{
 	public static function getErrorLog(){
 		return self::$connect->errorInfo();
 	}
+
 	public static function query($sql,$array=[]){//下SQL語法
 		ob_start();
 		try{	
