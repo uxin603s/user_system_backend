@@ -23,8 +23,8 @@ class UserList{
 				$access_token[$item['access_token']]=$item;
 			}
 		}
-		FlushCache::run("UserList",$UserList);
-		FlushCache::run("access_token",$access_token);
+		Cache::run("UserList",$UserList);
+		Cache::run("access_token",$access_token);
 	}
 	public static function getAccessToken(){
 		do{
@@ -65,28 +65,28 @@ class UserList{
 	}
 	public static function compactUser($access_token){
 		
-		if($result=FlushCache::get("access_token",$access_token)){
-			if($tmp=FlushCache::get("UserRole",$result['id'])){
+		if($result=Cache::get_one("access_token",$access_token)){
+			if($tmp=Cache::get_one("UserRole",$result['id'])){
 				$result['rid']=$tmp;
 				$result['data']=[];
 				$result['role']=[];
 				$result['role_user']=[];
 				$result['web']=[];
 				foreach($result['rid'] as $rid){
-					if($RoleData=FlushCache::get("RoleData",$rid)){
+					if($RoleData=Cache::get_one("RoleData",$rid)){
 						$result['data'][$rid]=$RoleData;
 					}
-					if($RoleList=FlushCache::get("RoleList",$rid)){
+					if($RoleList=Cache::get_one("RoleList",$rid)){
 						$result['role'][$rid]=$RoleList;
-						if($WebList=FlushCache::get("WebList",$RoleList['wid'])){
+						if($WebList=Cache::get_one("WebList",$RoleList['wid'])){
 							$result['web'][$rid][]=$WebList;
 						}
 					}
 					
 					$RoleUser=[];
-					if($tmp=FlushCache::get("RoleUser",$rid)){
+					if($tmp=Cache::get_one("RoleUser",$rid)){
 						foreach($tmp as $uid){
-							if($UserList=FlushCache::get("UserList",$uid)){
+							if($UserList=Cache::get_one("UserList",$uid)){
 								$RoleUser[]=$UserList;
 							}
 						}
@@ -94,8 +94,8 @@ class UserList{
 					$result['role_user'][$rid]=$RoleUser;
 				}
 				if(in_array(0,$result['rid'])){
-					$result['role_user'][-1]=FlushCache::get_all("UserList");
-					$result['web'][-1]=FlushCache::get_all("WebList");;
+					$result['role_user'][-1]=Cache::get_all("UserList");
+					$result['web'][-1]=Cache::get_all("WebList");;
 				}
 			}
 		}

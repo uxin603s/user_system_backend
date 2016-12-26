@@ -9,7 +9,6 @@ include_once __DIR__."/github/SessionSW/SessionSW.php";
 include_once __DIR__."/github/Cache/Fcache.php";
 include_once __DIR__."/github/Cache/Mcache.php";
 include_once __DIR__."/github/Cache/Cache.php";
-include_once __DIR__."/github/FlushCache/FlushCache.php";
 
 include_once __DIR__."/FbRegisterList.php";
 include_once __DIR__."/UserList.php";

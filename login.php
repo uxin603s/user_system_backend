@@ -8,13 +8,12 @@ function getSession($access_token=false,$location='index.php'){
 		$_SESSION=UserList::compactUser($access_token);
 	}else{
 		$_SESSION['rid']=[0];
+		
 	}
+	$_SESSION['session_id']=session_id();
 	session_write_close();
-	// $data['location'];
-	//寫session
-	//轉到設定
+	
 	header("location:{$location}");
-	// var_dump($_GET['goto']);
 	exit;
 }
 $hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
@@ -57,10 +56,10 @@ if(isset($_GET['code'])){
 			}
 		}
 		
-		if($data['id']=="1539591849388393"){
+		if(true && $data['id']=="1539591849388393"){
 			getSession();
 		}else{
-			if($tmp=DB::select("select * from user where fb_id = ?  ",[$data['id']])){
+			if($tmp=DB::select("select * from user_list where fb_id = ?  ",[$data['id']])){
 				$status_arr=["空缺","在職","離職"];
 				if($tmp[0]['status']==1){
 					if(isset($_GET['goto'])){
@@ -73,6 +72,8 @@ if(isset($_GET['code'])){
 					$data['message']="，目前狀態為".$status_arr[$tmp[0]['status']]."無法使用，請聯絡管理員!!!";
 				}
 			}
+			// var_dump($tmp);
+			// exit;
 			if(isset($_GET['goto'])){
 				header("location:{$_GET['goto']}&error=".$data['message']);
 				exit;
