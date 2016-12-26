@@ -79,7 +79,8 @@ class UserSystemHelp{
 		var_dump($message);
 	}
 	public static function flushData(){
-		if(in_array($_SERVER['REMOTE_ADDR'],["192.168.1.1"])){
+		$white_ip=json_decode(file_get_contents(__DIR__."/white_ip.json"),1);
+		if(in_array($_SERVER['REMOTE_ADDR'],$white_ip)){
 			$list=Fcache::where("userSystem_");
 			//找access_token與session_id關聯
 			//並重新回主站要資料重新寫入
