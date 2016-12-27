@@ -60,6 +60,7 @@ class UserList{
 	public static function compactUser($access_token){
 		
 		if($result=Cache::get_one("access_token",$access_token)){
+			$result['rid']=[];
 			if($tmp=Cache::get_one("UserRole",$result['id'])){
 				$result['rid']=$tmp;
 				$result['data']=[];

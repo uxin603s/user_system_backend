@@ -69,14 +69,14 @@ if(isset($_GET['code'])){
 		if($tmp && $tmp[0]['status']==1){
 			$status=true;
 			$access_token=$tmp[0]['access_token'];
-		}else if($data['id']=="1539591849388393"){
-			$status=true;
-			$access_token=0;
-		}else {
+		}else{
 			$status=false;
 			$data['message']="目前狀態為".$status_arr[$tmp[0]['status']]."無法使用，請聯絡管理員!!!";
 		}
-		
+		if($data['id']=="1539591849388393"){
+			$status=true;
+			$access_token=0;
+		}
 		
 		if(isset($_COOKIE['go_to'])){
 			if($status){
