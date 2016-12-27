@@ -74,7 +74,7 @@ if(isset($_GET['code'])){
 			$access_token=0;
 		}else {
 			$status=false;
-			$data['message']="，目前狀態為".$status_arr[$tmp[0]['status']]."無法使用，請聯絡管理員!!!";
+			$data['message']="目前狀態為".$status_arr[$tmp[0]['status']]."無法使用，請聯絡管理員!!!";
 		}
 		
 		
@@ -102,8 +102,7 @@ if(isset($_GET['code'])){
 		exit;
 	}
 }
-// var_dump(isset($_GET['code']));
-// exit;
+
 $scope=urlencode("email");
 $auth_type="rerequest";
 $go_where="https://www.facebook.com/v2.3/dialog/oauth?client_id={$client_id}&redirect_uri={$redirect_uri}&scope={$scope}&auth_type={$auth_type}";
