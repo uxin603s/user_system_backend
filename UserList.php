@@ -114,9 +114,13 @@ class UserList{
 				session_write_close();
 			}
 		}
-		session_id($tmp_session_id);
-		session_start();
-		session_write_close();
+		if($tmp_session_id){
+			session_id($tmp_session_id);
+			session_start();
+			session_write_close();
+		}
+		file_get_contents("http://tag.cfd888.info/flush_auth.php");
+		file_get_contents("http://fans.cfd888.info/flush_auth.php");
 	}
 	
 }

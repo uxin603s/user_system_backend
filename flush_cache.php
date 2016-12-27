@@ -9,4 +9,4 @@ RoleData::flushCache();
 DataList::flushCache();
 WebList::flushCache();
 
-UserList::reset_session();
+// UserList::reset_session();
