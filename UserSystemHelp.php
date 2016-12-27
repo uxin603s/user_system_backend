@@ -2,7 +2,6 @@
 class UserSystemHelp{
 	public static function login($success="",$error="",$location=true){
 		if(isset($_GET['access_token'])){
-		
 			if(mb_strlen($_GET['access_token'])==32 && preg_match("/^[a-z0-9]+$/",$_GET['access_token'])){
 				$ip=$_SERVER['REMOTE_ADDR'];
 				$url="http://user.cfd888.info/api.php?access_token={$_GET['access_token']}&ip={$ip}";
@@ -67,6 +66,7 @@ class UserSystemHelp{
 	}
 	
 	public static function error($message){
+		return $message;
 		// 錯誤頁面顯示
 		var_dump($message);
 	}
