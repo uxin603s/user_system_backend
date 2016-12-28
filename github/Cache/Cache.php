@@ -36,7 +36,7 @@ class Cache{
 		return $data;	
 	}
 	
-	public static function run($name,$list){
+	public static function group_save($name,$list){
 		$new=array_keys($list);
 		
 		$old=[];
@@ -53,19 +53,29 @@ class Cache{
 			self::del($name.".id.".$key);
 		}
 		
-		$new_list=self::get_all($name);
+		$new_list=self::group_get_all($name);
 		return $new_list;
 	}
-	public static function get_all($name){
+	public static function group_get_all($name){
 		$ids=self::get($name.".list");
 		$result=[];
 		if($ids)
 		foreach($ids as $id){
-			$result[$id]=self::get_one($name,$id);
+			$result[$id]=self::group_get_one($name,$id);
 		}
 		return $result;
 	}
-	public static function get_one($name,$id){
+	public static function group_get_one($name,$id){
 		return self::get($name.".id.".$id);
 	}
+	public static function group_del_all($name){
+		$ids=self::get($name.".list");
+		
+		if($ids)
+		foreach($ids as $id){
+			self::del($name.".id.".$id);
+		}
+		self::del($name.".list");
+	}
+	
 }
