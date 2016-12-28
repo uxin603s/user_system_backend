@@ -62,7 +62,7 @@ class Cache{
 		$result=[];
 		if($ids)
 		foreach($ids as $id){
-			$result[]=self::get_one($name,$id);
+			$result[$id]=self::get_one($name,$id);
 		}
 		return $result;
 	}
