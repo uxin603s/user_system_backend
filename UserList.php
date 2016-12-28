@@ -23,8 +23,8 @@ class UserList{
 				$access_token[$item['access_token']]=$item;
 			}
 		}
-		Cache::run("UserList",$UserList);
-		Cache::run("access_token",$access_token);
+		Cache::group_save("UserList",$UserList);
+		Cache::group_save("access_token",$access_token);
 	}
 	public static function getAccessToken(){
 		do{

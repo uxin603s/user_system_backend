@@ -14,8 +14,8 @@ class UserRole{
 			}
 		}
 		
-		Cache::run("UserRole",$UserRole);
-		Cache::run("RoleUser",$RoleUser);
+		Cache::group_save("UserRole",$UserRole);
+		Cache::group_save("RoleUser",$RoleUser);
 		UserList::reset_session();
 	}
 }

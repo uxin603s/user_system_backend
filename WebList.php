@@ -11,7 +11,7 @@ class WebList{
 				$WebList[$item['id']]=$item;
 			}
 		}
-		Cache::run("WebList",$WebList);
+		Cache::group_save("WebList",$WebList);
 		UserList::reset_session();
 	}
 }

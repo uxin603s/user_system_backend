@@ -11,7 +11,7 @@ class RoleList{
 				$RoleList[$item['id']]=$item;
 			}
 		}
-		Cache::run("RoleList",$RoleList);
+		Cache::group_save("RoleList",$RoleList);
 		UserList::reset_session();
 	}
 }

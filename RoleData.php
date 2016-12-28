@@ -13,7 +13,7 @@ class RoleData{
 				}
 			}		
 		}
-		Cache::run("RoleData",$RoleData,1);
+		Cache::group_save("RoleData",$RoleData,1);
 		UserList::reset_session();
 	}
 }

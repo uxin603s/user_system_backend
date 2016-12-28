@@ -11,7 +11,7 @@ class DataList{
 				$DataList[$item['id']]=$item['name'];
 			}		
 		}
-		Cache::run("DataList",$DataList);
+		Cache::group_save("DataList",$DataList);
 		UserList::reset_session();
 	}
 }
