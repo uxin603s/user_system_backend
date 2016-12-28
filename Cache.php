@@ -36,13 +36,12 @@ class Cache{
 		return $data;	
 	}
 	
-	public static function run($name,$list,$flush=false){
+	public static function run($name,$list){
 		$new=array_keys($list);
+		
 		$old=[];
-		if(!$flush){
-			if($tmp=self::get($name.".list")){
-				$old=$tmp;
-			}
+		if($tmp=self::get($name.".list")){
+			$old=$tmp;
 		}
 		
 		self::set($name.".list",$new,60*30);
