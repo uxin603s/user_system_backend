@@ -45,6 +45,8 @@ class UserSystemHelp{
 		
 		if($data['go_to'] && is_numeric(strpos("http://{$_SERVER['HTTP_HOST']}",$data['go_to']))){
 			$go_to=$data['go_to'];
+		}else if($_COOKIE['go_to']){
+			$go_to=$_COOKIE['go_to'];
 		}else{
 			$go_to="/index.php";
 		}
