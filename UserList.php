@@ -59,29 +59,29 @@ class UserList{
 	}
 	public static function compactUser($access_token){
 		
-		if($result=Cache::get_one("access_token",$access_token)){
+		if($result=Cache::group_get_one("access_token",$access_token)){
 			$result['rid']=[];
-			if($tmp=Cache::get_one("UserRole",$result['id'])){
+			if($tmp=Cache::group_get_one("UserRole",$result['id'])){
 				$result['rid']=$tmp;
 				$result['data']=[];
 				$result['role']=[];
 				$result['role_user']=[];
 				$result['web']=[];
 				foreach($result['rid'] as $rid){
-					if($RoleData=Cache::get_one("RoleData",$rid)){
+					if($RoleData=Cache::group_get_one("RoleData",$rid)){
 						$result['data'][$rid]=$RoleData;
 					}
-					if($RoleList=Cache::get_one("RoleList",$rid)){
+					if($RoleList=Cache::group_get_one("RoleList",$rid)){
 						$result['role'][$rid]=$RoleList;
-						if($WebList=Cache::get_one("WebList",$RoleList['wid'])){
+						if($WebList=Cache::group_get_one("WebList",$RoleList['wid'])){
 							$result['web'][$rid][$RoleList['wid']]=$WebList;
 						}
 					}
 					
 					$RoleUser=[];
-					if($tmp=Cache::get_one("RoleUser",$rid)){
+					if($tmp=Cache::group_get_one("RoleUser",$rid)){
 						foreach($tmp as $uid){
-							if($UserList=Cache::get_one("UserList",$uid)){
+							if($UserList=Cache::group_get_one("UserList",$uid)){
 								$RoleUser[]=$UserList;
 							}
 						}
@@ -89,8 +89,8 @@ class UserList{
 					$result['role_user'][$rid]=$RoleUser;
 				}
 				if(in_array(0,$result['rid'])){
-					$result['role_user'][0]=Cache::get_all("UserList");
-					$result['web'][0]=Cache::get_all("WebList");;
+					$result['role_user'][0]=Cache::group_get_all("UserList");
+					$result['web'][0]=Cache::group_get_all("WebList");;
 				}
 			}
 		}
