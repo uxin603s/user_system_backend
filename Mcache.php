@@ -50,14 +50,11 @@ class Mcache{
 	}
 	//功能:刪除有prefix的資料
 	public static function del_all(){
-		self::init();	
-		$del_array=[];
-		if($all_keys=self::where()){			
-			foreach($all_keys as $key_name=>$val){	
-				if(self::del($key_name))$del_array[]=$key_name;
-			}			
-		}
-		return $del_array;		
+		$list=self::where();
+		foreach($list as $key=>$val){	
+			self::del($key);
+		}	
+		return $list;		
 	}	
 	//功能:以鍵值搜尋快取資料
 	public static function where($where=""){
@@ -66,13 +63,14 @@ class Mcache{
 		if($all_keys=self::$con->getAllKeys()){
 			$return_array=[];
 			foreach($all_keys as $key_name){
-				if(strpos($key_name,self::$prefix.$where)===0){		
+				if(strpos($key_name,self::$prefix)===0){
 					$start=strlen(self::$prefix);
 					$count=strlen($key_name);
 					$key_name=substr($key_name,$start,$count);
-					// $key_name=str_replace(self::$prefix.$where,$where,$key_name);
-					if($memcached_value=self::get($key_name)){						
-						$return_array[$key_name]=$memcached_value;
+					if(!$where || (strpos($key_name,$where)===0) || preg_match($where,$key_name)){
+						if($memcached_value=self::get($key_name)){						
+							$return_array[$key_name]=$memcached_value;
+						}
 					}
 				}
 			}
