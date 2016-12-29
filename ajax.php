@@ -9,7 +9,8 @@ if(isset($_SESSION['rid']) && in_array(0,$_SESSION['rid'])){
 }else{
 	$status=false;
 	$message="權限不足";
-	$result=compact(['status',"message"]);
+	$reload=1;
+	$result=compact(['status',"message","reload"]);
 	echo json_encode($result);
 	exit;
 }
