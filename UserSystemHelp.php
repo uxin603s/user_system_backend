@@ -120,31 +120,5 @@ class UserSystemHelp{
 			}
 		}
 	}
-	public static function check_session(){
-		session_start();
-		if($_SESSION['access_token']){
-			$tmp=Fcache::get("userSystem_{$_SESSION['access_token']}");
-			$message=[];
-			$status=true;
-			if(session_id()!=$tmp['session_id']){
-				$status=false;
-				$message[]="session_id不等於";
-			}
-			if($tmp['REMOTE_ADDR']!=$_SERVER['REMOTE_ADDR']){
-				$status=false;
-				$message[]="REMOTE_ADDR不等於";
-			}
-			
-			
-			if(!$status){
-				session_destroy();
-				$status=false;
-				$message=implode(",",$message);
-				$reload=1;
-				$result=compact(['status',"message","reload"]);
-				echo json_encode($result);
-				exit;
-			}
-		}
-	}
+	
 }
