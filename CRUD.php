@@ -126,19 +126,18 @@ trait CRUD{
 	}
 	public static function getCache($where=[]){
 		$query_field=self::$cache_key_field;
+		if(!is_array($query_field))return false;
+		
 		$key_arr=[__CLASS__];
 		foreach($query_field as $field){
 			$key_arr[]=$field;
-			$key_arr[]=$where[$field]?$where[$field]:"[\d]+?";
+			$key_arr[]=$where[$field]?$where[$field]:"[\w]+?";
 		}
 		$key=implode("\.",$key_arr);
 		$where="/{$key}/";
-		// var_dump($where);
 		$list=Fcache::where($where);
-		
 		return $list;
 	}
-		
 	public static function flushCache($type=0){
 		if(is_array(self::$cache_key_field)){
 			$query_field=self::$cache_key_field;
