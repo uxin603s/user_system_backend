@@ -127,7 +127,6 @@ trait CRUD{
 	public static function getCache($where=[]){
 		$query_field=self::$cache_key_field;
 		if(!is_array($query_field))return false;
-		
 		$key_arr=[__CLASS__];
 		foreach($query_field as $field){
 			$key_arr[]=$field;
