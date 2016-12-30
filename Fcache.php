@@ -67,14 +67,13 @@ class Fcache{
 		return false;
 	}
 	//功能:以鍵值搜尋快取資料
-	public static function where($where=""){
+	public static function where($where="",$key_type=0){
 		self::init();
 		$path=self::$path;
 		$data=[];
 		
 		exec("find {$path} -name '*' -type f ",$data);
-		$retrun_array=[];
-		
+		$result=[];		
 		foreach($data as $key_name){
 			$start=strrpos($key_name,"/")+1;
 			$len=strlen($key_name);
@@ -84,10 +83,16 @@ class Fcache{
 			if((strpos($key_name,".")===0))continue;
 			
 			if(!$where || (strpos($key_name,$where)===0) || @preg_match($where,$key_name)){
-				$retrun_array[$key_name]=self::get($key_name);
+				if($value=self::get($key_name)){
+					if($key_type){
+						$result[$key_name]=$value;
+					}else{
+						$result[]=$value;
+					}
+				}
 			}
 		}						
-		return $retrun_array;
+		return $result;
 	}
 	//功能:刪除所有快取
 	public static function del_all(){

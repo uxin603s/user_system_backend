@@ -34,52 +34,5 @@ class Cache{
 			$data=Fcache::where($where);
 		}
 		return $data;	
-	}
-	
-	
-	
+	}	
 }
-/*
-準備刪除
-public static function group_save($name,$list){
-	$new=array_keys($list);
-	
-	$old=[];
-	if($tmp=self::get($name.".list")){
-		$old=$tmp;
-	}
-	
-	self::set($name.".list",$new,60*30);
-	foreach($new as $key){
-		self::set($name.".id.".$key,$list[$key],60*30);
-	}
-	$del=array_diff($old,$new);
-	foreach($del as $key){
-		self::del($name.".id.".$key);
-	}
-	
-	$new_list=self::group_get_all($name);
-	return $new_list;
-}
-public static function group_get_all($name){
-	$ids=self::get($name.".list");
-	$result=[];
-	if($ids)
-	foreach($ids as $id){
-		$result[$id]=self::group_get_one($name,$id);
-	}
-	return $result;
-}
-public static function group_get_one($name,$id){
-	return self::get($name.".id.".$id);
-}
-public static function group_del_all($name){
-	$ids=self::get($name.".list");
-	
-	if($ids)
-	foreach($ids as $id){
-		self::del($name.".id.".$id);
-	}
-	self::del($name.".list");
-}
-*/
