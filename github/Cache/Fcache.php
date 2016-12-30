@@ -67,38 +67,35 @@ class Fcache{
 		return false;
 	}
 	//功能:以鍵值搜尋快取資料
-	public static function where($where="*"){
+	public static function where($where=""){
 		self::init();
 		$path=self::$path;
 		$data=[];
 		
-		exec("find {$path}/* -name '{$where}*' -type f ",$data);
+		exec("find {$path} -name '*' -type f ",$data);
 		$retrun_array=[];
 		
 		foreach($data as $key_name){
-			$file_cache=file_get_contents($key_name);
-			$tmp_explode=explode('/',$key_name);
-			$file_key=array_pop($tmp_explode);
+			$start=strrpos($key_name,"/")+1;
+			$len=strlen($key_name);
+			$count=$len-$start;
+			$key_name=substr($key_name,$start,$count);
 			
-			if(!(strpos('.',$file_key)===0))
-				$retrun_array[$file_key]=self::get($file_key);
-			unset($tmp_explode);
-			unset($file_cache);
+			if((strpos($key_name,".")===0))continue;
+			
+			if(!$where || (strpos($key_name,$where)===0) || @preg_match($where,$key_name)){
+				$retrun_array[$key_name]=self::get($key_name);
+			}
 		}						
 		return $retrun_array;
 	}
 	//功能:刪除所有快取
 	public static function del_all(){
-		self::init();
-		$path=self::$path;
-		exec("rm -rf {$path}/*");
-		// $count=0;
-		// $where=self::where();
-		// foreach($where as $key=>$val){
-			// if(self::del($key)){
-				// $count++;
-			// }
-		// }
-		// return $count;
+		
+		$where=self::where();
+		foreach($where as $key=>$val){
+			self::del($key);
+		}
+		return $where;
 	}
 }
