@@ -57,24 +57,28 @@ class Mcache{
 		return $list;		
 	}	
 	//功能:以鍵值搜尋快取資料
-	public static function where($where=""){
+	public static function where($where="",$key_type=0){
 		self::init();
-		$return_array=false;
+		$result=[];
 		if($all_keys=self::$con->getAllKeys()){
-			$return_array=[];
+			
 			foreach($all_keys as $key_name){
 				if(strpos($key_name,self::$prefix)===0){
 					$start=strlen(self::$prefix);
 					$count=strlen($key_name);
 					$key_name=substr($key_name,$start,$count);
 					if(!$where || (strpos($key_name,$where)===0) || preg_match($where,$key_name)){
-						if($memcached_value=self::get($key_name)){						
-							$return_array[$key_name]=$memcached_value;
+						if($value=self::get($key_name)){
+							if($key_type){
+								$result[$key_name]=$value;
+							}else{
+								$result[]=$value;
+							}
 						}
 					}
 				}
 			}
 		}		
-		return $return_array;						
+		return $result;						
 	}
 }

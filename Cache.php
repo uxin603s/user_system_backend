@@ -34,10 +34,7 @@ class Cache{
 			$data=Fcache::where($where);
 		}
 		return $data;	
-	}
-	
-	
-	
+	}	
 }
 /*
 準備刪除
