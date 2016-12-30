@@ -18,7 +18,8 @@ class UserList{
 			];
 			$result=self::getList(compact(['where_list']));
 		}while($result['status']);
-		return $access_token;
+		$status=true;
+		return compact(["status","access_token"]);
 	}
 	public static function insert($arg){
 		$arg['status']=0;
