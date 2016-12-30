@@ -1,8 +1,6 @@
 <?php
 trait CRUD{
-	public static function flushCache(){
-		
-	}
+	
 	public static function filter_field($list){
 		if($list && is_array($list)){
 			foreach($list as $field=>$value){
@@ -92,7 +90,7 @@ trait CRUD{
 			}
 			$status=true;
 			$message="新增成功";
-			self::flushCache();
+			self::flushCache($insert,1);
 		}else{
 			$status=false;
 			$message="新增失敗";
@@ -100,13 +98,14 @@ trait CRUD{
 		return compact(['status','message','insert']);
 	}
 	public static function update($arg){
-		$arg['update']=self::filter_field($arg['update']);
-		$arg['where']=self::filter_field($arg['where']);
+		$update=self::filter_field($arg['update']);
+		$where=self::filter_field($arg['where']);
+		
 		//欄位案權限 再過濾一次
-		if(DB::update($arg['update'],$arg['where'],self::$table)){
+		if(DB::update($update,$where,self::$table)){
 			$status=true;
 			$message="修改成功";
-			self::flushCache();
+			self::flushCache(compact(['update','where']),2);
 		}else{
 			$status=false;
 			$message="修改失敗";
@@ -118,11 +117,83 @@ trait CRUD{
 		if(DB::delete($where,self::$table)){
 			$status=true;
 			$message="刪除成功";
-			self::flushCache();
+			self::flushCache(compact(['where']),3);
 		}else{
 			$status=false;
 			$message="刪除失敗";
 		}
 		return compact(['status','message']);
+	}
+	public static function getCache($where=[]){
+		$query_field=self::$cache_key_field;
+		$key_arr=[__CLASS__];
+		foreach($query_field as $field){
+			$key_arr[]=$field;
+			$key_arr[]=$where[$field]?$where[$field]:"[\d]+?";
+		}
+		$key=implode("\.",$key_arr);
+		$where="/{$key}/";
+		// var_dump($where);
+		$list=Fcache::where($where);
+		
+		return $list;
+	}
+		
+	public static function flushCache($type=0){
+		if(is_array(self::$cache_key_field)){
+			$query_field=self::$cache_key_field;
+		}else{
+			return false;
+		}
+		
+		switch($type){
+			case 0://init
+				$tmp=self::getList();
+				if($tmp['status']){
+					foreach($tmp['list'] as $value){
+						$key_arr=[__CLASS__];
+						foreach($query_field as $field){
+							$key_arr[]=$field;
+							$key_arr[]=$value[$field];
+						}
+						$key=implode(".",$key_arr);
+						Fcache::set($key,$value);
+					}
+				}
+				break;
+			case 1://insert
+				$key_arr=[__CLASS__];
+				foreach($query_field as $field){
+					$key_arr[]=$field;
+					$key_arr[]=$arg[$field];
+				}
+				$key=implode(".",$key_arr);
+				Fcache::set($key,$arg);
+				break;
+				
+			case 2:case 3://update,delete
+				$key_arr=[__CLASS__];
+				foreach($query_field as $field){
+					$key_arr[]=$field;
+					$key_arr[]=$arg['where'][$field]?$arg['where'][$field]:"[\d]+?";
+				}
+				$key=implode("\.",$key_arr);
+				$where="/{$key}/";
+				
+				$list=Fcache::where($where);
+				foreach($list as $key=>$val){
+					foreach($arg['update'] as $u_key=>$u_val){
+						$val[$u_key]=$u_val;
+					}
+					if($type==2){
+						Fcache::set($key,$val);
+					}else{
+						Fcache::del($key,$val);
+					}
+				}
+				
+				break;
+		}
+		
 	}
 }
