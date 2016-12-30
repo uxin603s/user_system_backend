@@ -73,8 +73,7 @@ class Fcache{
 		$data=[];
 		
 		exec("find {$path} -name '*' -type f ",$data);
-		$result=[];
-		
+		$result=[];		
 		foreach($data as $key_name){
 			$start=strrpos($key_name,"/")+1;
 			$len=strlen($key_name);
