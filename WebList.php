@@ -1,17 +1,13 @@
 <?php
 class WebList{
 	public static $table='web_list';
-	public static $filter_field_arr=['id','name','status','fb_id','created_time_int'];
-	use CRUD;
+	public static $filter_field_arr=['id','name'];
+	public static $cache_key_field=['id'];
+	use CRUD{
+		CRUD::flushCache as private tmp_flushCache;	
+	}
 	public static function flushCache(){
-		$tmp=self::getList(null);
-		$WebList=[];
-		if($tmp['status']){
-			foreach($tmp['list'] as $item){
-				$WebList[$item['id']]=$item;
-			}
-		}
-		Cache::group_save("WebList",$WebList);
+		self::tmp_flushCache();
 		UserList::reset_session();
 	}
 }

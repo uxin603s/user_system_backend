@@ -3,17 +3,22 @@ include_once __DIR__."/include.php";
 
 function getSession($access_token=false,$location='index.php'){
 	
-	session_start();
+	
 	if($access_token){
-		$_SESSION=UserList::compactUser($access_token);
+		$data=UserList::compactUser($access_token);
 	}else{
 		$access_token=0;
-		$_SESSION['rid']=[0];
+		$data['rid']=[0];
 	}
-	$_SESSION['session_id']=session_id();
+	session_start();
+	$data['session_id']=session_id();
+	$data['REMOTE_ADDR']=$_SERVER['REMOTE_ADDR'];
 	
-	UserList::remember($access_token,$_SESSION);
-		
+	if($access_token){
+		Fcache::set("userSystem_{$access_token}",$data);
+	}
+	
+	$_SESSION=$data;
 	session_write_close();
 	
 	header("location:{$location}");

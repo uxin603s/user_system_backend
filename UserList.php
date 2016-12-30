@@ -2,29 +2,13 @@
 class UserList{
 	public static $table='user_list';
 	public static $filter_field_arr=['id','name','status','fb_id','created_time_int','access_token'];
+	public static $cache_key_field=['id','access_token','fb_id'];
 	use CRUD{
-		CRUD::insert as tmp_insert;
-		// CRUD::update as tmp_update;
+		CRUD::flushCache as private tmp_flushCache;	
 	}
 	public static function flushCache(){
-		$where_list=[
-			['field'=>'status','type'=>0,'value'=>1],
-		];
-		
-		$tmp=self::getList(compact(['where_list']));
-		$UserList=[];
-		$access_token=[];
-		if($tmp['status']){	
-			foreach($tmp['list'] as $item){
-				$UserList[$item['id']]=[
-					'id'=>$item['id'],
-					'name'=>$item['name'],
-				];
-				$access_token[$item['access_token']]=$item;
-			}
-		}
-		Cache::group_save("UserList",$UserList);
-		Cache::group_save("access_token",$access_token);
+		self::tmp_flushCache();
+		// UserList::reset_session();
 	}
 	public static function getAccessToken(){
 		do{
@@ -59,48 +43,57 @@ class UserList{
 	}
 	public static function compactUser($access_token){
 		
-		if($result=Cache::group_get_one("access_token",$access_token)){
+		if($tmp=UserList::getCache(["access_token"=>$access_token])){
+			$result=$tmp[0];
 			$result['rid']=[];
-			if($tmp=Cache::group_get_one("UserRole",$result['id'])){
-				$result['rid']=$tmp;
+			if($UserRole=UserRole::getCache(["uid"=>$result['id']])){
+				
+				$result['rid']=array_column($UserRole,'rid');
+				
 				$result['data']=[];
 				$result['role']=[];
 				$result['role_user']=[];
 				$result['web']=[];
+				
 				foreach($result['rid'] as $rid){
-					if($RoleData=Cache::group_get_one("RoleData",$rid)){
+					
+					if($RoleData=RoleData::getCache(['rid'=>$rid])){
 						$result['data'][$rid]=$RoleData;
 					}
-					if($RoleList=Cache::group_get_one("RoleList",$rid)){
-						$result['role'][$rid]=$RoleList;
-						if($WebList=Cache::group_get_one("WebList",$RoleList['wid'])){
-							$result['web'][$rid][$RoleList['wid']]=$WebList;
+					
+					if($RoleList=RoleList::getCache(['id'=>$rid])){
+						$result['role'][$rid]=$RoleList[0];
+						if($WebList=WebList::getCache(['id'=>$RoleList[0]['wid']])){
+							$result['web'][$rid][$RoleList[0]['wid']]=$WebList;
 						}
 					}
 					
 					$RoleUser=[];
-					if($tmp=Cache::group_get_one("RoleUser",$rid)){
-						foreach($tmp as $uid){
-							if($UserList=Cache::group_get_one("UserList",$uid)){
-								$RoleUser[]=$UserList;
+					if($UserRole=UserRole::getCache(['rid'=>$rid])){
+						foreach($UserRole as $item){
+							if($UserList=UserList::getCache(["id"=>$item['uid']])){
+								$RoleUser[]=[
+									"id"=>$UserList[0]['id'],
+									"name"=>$UserList[0]['name'],
+								];
 							}
 						}
-					}					
+					}
 					$result['role_user'][$rid]=$RoleUser;
 				}
+				
 				if(in_array(0,$result['rid'])){
-					$result['role_user'][0]=Cache::group_get_all("UserList");
-					$result['web'][0]=Cache::group_get_all("WebList");;
+					$result['role'][0]=['id'=>0,'name'=>"最高權限"];
+					$result['role_user'][0]=array_column(UserList::getCache(),"name","id");
+					$result['web'][0]=WebList::getCache();
+					ksort($result['role_user'][0]);
 				}
+				
 			}
 		}
 		return $result;
 	}
-	public static function remember($access_token,$data){
-		if($access_token){
-			Fcache::set("userSystem_{$access_token}",$data);
-		}
-	}
+	
 	public static function reset_session(){
 		$tmp_session_id=session_id();
 		if($list=Fcache::where("userSystem_")){
@@ -115,6 +108,7 @@ class UserList{
 				session_write_close();
 			}
 		}
+		
 		if($tmp_session_id){
 			session_id($tmp_session_id);
 			session_start();
