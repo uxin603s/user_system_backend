@@ -36,7 +36,6 @@ if($tmp=Mcache::get($memcache_key_count)){
 
 if($login_try<3 && mb_strlen($_GET['access_token'])==32 && preg_match("/^[a-z0-9]+$/",$_GET['access_token'])){
 	$data=UserList::compactUser($_GET['access_token']);
-	
 	$status=true;
 	$message="成功取得資料";
 	Mcache::set($memcache_key_count,0);

@@ -1,34 +1,13 @@
 <?php
 include_once __DIR__."/include.php";
 
-function getSession($access_token=false,$location='index.php'){
-	
-	
-	if($access_token){
-		$data=UserList::compactUser($access_token);
-	}else{
-		$access_token=0;
-		$data['rid']=[0];
-	}
-	session_start();
-	$data['session_id']=session_id();
-	$data['REMOTE_ADDR']=$_SERVER['REMOTE_ADDR'];
-	
-	if($access_token){
-		Fcache::set("userSystem_{$access_token}",$data);
-	}
-	
-	$_SESSION=$data;
-	session_write_close();
-	
-	header("location:{$location}");
-	exit;
-}
+
 
 $hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
 
 if(in_array(gethostname(),$hostname)){
-	getSession();
+	UserSystemHelp::$local=true;
+	UserSystemHelp::login();
 }
 
 $FB=json_decode(file_get_contents(__DIR__."/config/FB.json"),1);
@@ -94,7 +73,8 @@ if(isset($_GET['code'])){
 			exit;
 		}else{
 			if($status){
-				getSession($access_token);
+				$_REQUEST['access_token']=$access_token;
+				UserSystemHelp::login();
 			}
 		}
 		

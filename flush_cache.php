@@ -10,6 +10,9 @@ include_once __DIR__."/include.php";
 // DataList::flushCache();
 // WebList::flushCache();
 // FbRegisterList::flushCache();
+UserList::reset_session();
+
+
 // $list=UserList::getCache(['id'=>9]);
 
 // foreach($list as $val){	

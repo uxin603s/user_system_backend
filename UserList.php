@@ -2,7 +2,7 @@
 class UserList{
 	public static $table='user_list';
 	public static $filter_field_arr=['id','name','status','fb_id','created_time_int','access_token'];
-	public static $cache_key_field=['id','access_token','fb_id'];
+	public static $cache_key_field=['id','access_token','fb_id','status'];
 	use CRUD{
 		CRUD::flushCache as private tmp_flushCache;	
 	}
@@ -105,7 +105,7 @@ class UserList{
 				session_start();
 				$_SESSION=self::compactUser($access_token);
 				$_SESSION['session_id']=$session_id;
-				self::remember($access_token,$_SESSION);
+				Fcache::set("userSystem_{$access_token}",$data);
 				session_write_close();
 			}
 		}
@@ -115,8 +115,11 @@ class UserList{
 			session_start();
 			session_write_close();
 		}
-		file_get_contents("http://tag.cfd888.info/flush_auth.php");
-		file_get_contents("http://fans.cfd888.info/flush_auth.php");
+		
+		ob_start();
+		system("/usr/bin/nohup /usr/bin/curl http://tag.cfd888.info/flush_auth.php > /dev/null 2>&1 & ");
+		system("/usr/bin/nohup /usr/bin/curl http://fans.cfd888.info/flush_auth.php > /dev/null 2>&1 & ");
+		ob_get_contents();
 	}
 	
 }
