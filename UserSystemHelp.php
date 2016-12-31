@@ -1,10 +1,17 @@
 <?php
 class UserSystemHelp{
-	public static function login($success="",$error="",$location=true){
-		if(isset($_GET['access_token'])){
-			if(mb_strlen($_GET['access_token'])==32 && preg_match("/^[a-z0-9]+$/",$_GET['access_token'])){
+	public static $location=true;
+	public static $local=false;
+	public static function login($success="UserSystemHelp::success",$error="UserSystemHelp::error"){
+		if($local){
+			$data['rid']=[0];
+			UserSystemHelp::success($data);
+			exit;
+		}
+		if(isset($_REQUEST['access_token'])){
+			if(mb_strlen($_REQUEST['access_token'])==32 && preg_match("/^[a-z0-9]+$/",$_REQUEST['access_token'])){
 				$ip=$_SERVER['REMOTE_ADDR'];
-				$url="http://user.cfd888.info/api.php?access_token={$_GET['access_token']}&ip={$ip}";
+				$url="http://user.cfd888.info/api.php?access_token={$_REQUEST['access_token']}&ip={$ip}";
 				ob_start();
 				$result=json_decode(file_get_contents($url),1);
 				ob_get_clean();
@@ -13,7 +20,7 @@ class UserSystemHelp{
 					$http_code=$match[0];
 				}
 				if(is_callable($success) && $result['status']){
-					call_user_func($success,$result['data'],$location);
+					call_user_func($success,$result['data']);
 				}
 			}else{
 				$result=[];
@@ -27,7 +34,7 @@ class UserSystemHelp{
 			}
 			
 		}
-		elseif(isset($_GET['error'])){
+		elseif(isset($_REQUEST['error'])){
 			if(is_callable($error)){
 				call_user_func($error,$result['error']);
 			}
@@ -38,7 +45,7 @@ class UserSystemHelp{
 			header("location: {$url}");
 		}
 	}
-	public static function success($data,$location){
+	public static function success($data){
 		
 		$access_token=$data['access_token'];
 		
@@ -55,13 +62,14 @@ class UserSystemHelp{
 		session_start();
 		$_SESSION=$data;
 		$data['session_id']=session_id();
+		$data['REMOTE_ADDR']=$_SERVER['REMOTE_ADDR'];
 		session_write_close();
 		
 		//data寫入快取方便主站掛點時利用 及主站 刷新外部網站用
 		Fcache::set("userSystem_{$access_token}",$data,60*30);
 		
 		//data找導頁資料並導頁
-		if($location){
+		if(self::$location){
 			header("location: {$go_to}");
 		}
 		
@@ -84,8 +92,9 @@ class UserSystemHelp{
 				if($item['session_id']){
 					session_id($item['session_id']);
 					
-					$_GET['access_token']=$access_token;
-					self::login("UserSystemHelp::success","UserSystemHelp::error",false);
+					$_REQUEST['access_token']=$access_token;
+					self::$location=false;
+					self::login();
 				}else{
 					Fcache::del("userSystem_{$access_token}");
 				}
@@ -93,25 +102,21 @@ class UserSystemHelp{
 			}
 		}
 	}
-	public static function check_session(){
-		session_start();
+	public static function checkSession(){
 		if($_SESSION['access_token']){
-			$tmp=Fcache::get("userSystem_{$_SESSION['access_token']}");
+			$data=Fcache::get("userSystem_{$_SESSION['access_token']}");
 			$message=[];
 			$status=true;
-			if(session_id()!=$tmp['session_id']){
+			if(session_id()!=$data['session_id']){
 				$status=false;
 				$message[]="session_id不等於";
 			}
-			if($tmp['REMOTE_ADDR']!=$_SERVER['REMOTE_ADDR']){
+			if($_SERVER['REMOTE_ADDR']!=$data['REMOTE_ADDR']){
 				$status=false;
 				$message[]="REMOTE_ADDR不等於";
 			}
-			
-			
 			if(!$status){
 				session_destroy();
-				$status=false;
 				$message=implode(",",$message);
 				$reload=1;
 				$result=compact(['status',"message","reload"]);
@@ -120,5 +125,4 @@ class UserSystemHelp{
 			}
 		}
 	}
-	
 }
