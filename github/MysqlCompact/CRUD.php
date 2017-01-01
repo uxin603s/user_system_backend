@@ -124,17 +124,28 @@ trait CRUD{
 		}
 		return compact(['status','message']);
 	}
-	public static function getCache($where=[]){
+	public static function getCache($where=[],$not_where=[]){
 		$query_field=self::$cache_key_field;
 		if(!is_array($query_field))return false;
-		$key_arr=[__CLASS__];
+		$preg_arr=[__CLASS__];
 		foreach($query_field as $field){
-			$key_arr[]=$field;
-			$key_arr[]=$where[$field]?$where[$field]:"[\w]+?";
+			$preg_arr[]=$field;
+			if(is_string($where[$field])){
+				$preg_arr[]=$where[$field]?$where[$field]:"(?P<{$field}>[\w]+?)";
+			}else{
+				$preg_arr[]="(?P<{$field}>[\w]+?)";
+			}
+			if(!is_array($where[$field])){
+				unset($where[$field]);
+			}
+			if(!is_array($not_where[$field])){
+				unset($not_where[$field]);
+			}
 		}
-		$key=implode("\.",$key_arr);
-		$where="/{$key}/";
-		$list=Fcache::where($where);
+		$preg=implode("\.",$preg_arr);
+		$preg="/{$preg}/";
+		$list=Fcache::where($preg,$where,$not_where);
+		$list=array_values($list);
 		return $list;
 	}
 	public static function flushCache($type=0){
