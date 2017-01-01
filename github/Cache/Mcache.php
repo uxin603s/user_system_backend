@@ -57,7 +57,7 @@ class Mcache{
 		return $list;		
 	}	
 	//功能:以鍵值搜尋快取資料
-	public static function where($where="",$key_type=0){
+	public static function where($preg="",$where=[],$not_where=[]){
 		self::init();
 		$result=[];
 		if($all_keys=self::$con->getAllKeys()){
@@ -67,15 +67,25 @@ class Mcache{
 					$start=strlen(self::$prefix);
 					$count=strlen($key_name);
 					$key_name=substr($key_name,$start,$count);
-					if(!$where || (strpos($key_name,$where)===0) || preg_match($where,$key_name)){
-						if($value=self::get($key_name)){
-							if($key_type){
-								$result[$key_name]=$value;
-							}else{
-								$result[]=$value;
+					
+					if(!$preg || (strpos($key_name,$preg)===0) || preg_match($preg,$key_name,$match)){
+						if($match){
+							foreach($not_where as $field=>$array){
+								if($match[$field] && in_array($match[$field],$array)){
+									continue 2;
+								}
+							}
+							foreach($where as $field=>$array){
+								if($match[$field] && !in_array($match[$field],$array)){
+									continue 2;
+								}
 							}
 						}
+						if($value=self::get($key_name)){
+							$result[$key_name]=$value;
+						}
 					}
+					unset($match);
 				}
 			}
 		}		
