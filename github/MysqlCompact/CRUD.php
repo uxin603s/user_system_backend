@@ -130,8 +130,13 @@ trait CRUD{
 		$preg_arr=[__CLASS__];
 		foreach($query_field as $field){
 			$preg_arr[]=$field;
-			if(is_string($where[$field])){
-				$preg_arr[]=$where[$field]?$where[$field]:"(?P<{$field}>[\w]+?)";
+			
+			if(!is_array($where[$field])){
+				if(isset($where[$field])){
+					$preg_arr[]=$where[$field];
+				}else{
+					$preg_arr[]="(?P<{$field}>[\w]+?)";
+				}
 			}else{
 				$preg_arr[]="(?P<{$field}>[\w]+?)";
 			}
@@ -144,6 +149,7 @@ trait CRUD{
 		}
 		$preg=implode("\.",$preg_arr);
 		$preg="/{$preg}/";
+		
 		$list=Fcache::where($preg,$where,$not_where);
 		$list=array_values($list);
 		return $list;
