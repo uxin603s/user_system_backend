@@ -3,7 +3,8 @@ class UserSystemHelp{
 	public static $location=true;
 	public static $local=false;
 	public static function login($success="UserSystemHelp::success",$error="UserSystemHelp::error"){
-		if($local){
+		setcookie("access_token","",time()-60*60);
+		if(self::$local){
 			$data['rid']=[0];
 			UserSystemHelp::success($data);
 			exit;
@@ -30,7 +31,6 @@ class UserSystemHelp{
 				$result['status']=false;
 				$result['message']="access_token不符合規定";
 			}
-			setcookie("access_token","",time()-60*60);
 			
 			if(is_callable($error) && !$result['status']){
 				call_user_func($error,$result['message']);
@@ -51,7 +51,6 @@ class UserSystemHelp{
 	public static function success($data){
 		
 		$access_token=$data['access_token'];
-		
 		
 		if($data['go_to'] && is_numeric(strpos("http://{$_SERVER['HTTP_HOST']}",$data['go_to']))){
 			$go_to=$data['go_to'];
