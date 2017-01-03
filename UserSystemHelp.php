@@ -19,6 +19,9 @@ class UserSystemHelp{
 				if(preg_match("/\d{3}/",$http_response_header[0],$match)){
 					$http_code=$match[0];
 				}
+				if($http_code!=200){
+					$result=Fcache::get("userSystem_{$_REQUEST['access_token']}");
+				}
 				if(is_callable($success) && $result['status']){
 					call_user_func($success,$result['data']);
 				}
@@ -27,7 +30,7 @@ class UserSystemHelp{
 				$result['status']=false;
 				$result['message']="access_token不符合規定";
 			}
-			
+			setcookie("access_token","",time()-60*60);
 			
 			if(is_callable($error) && !$result['status']){
 				call_user_func($error,$result['message']);
@@ -66,8 +69,8 @@ class UserSystemHelp{
 		session_write_close();
 		
 		//data寫入快取方便主站掛點時利用 及主站 刷新外部網站用
-		Fcache::set("userSystem_{$access_token}",$data,60*30);
-		
+		Fcache::set("userSystem_{$access_token}",$data);
+		setcookie("access_token",$access_token,time()+60*60);
 		//data找導頁資料並導頁
 		if(self::$location){
 			header("location: {$go_to}");
