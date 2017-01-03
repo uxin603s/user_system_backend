@@ -163,6 +163,7 @@ trait CRUD{
 		
 		switch($type){
 			case 0://init
+				
 				$tmp=self::getList();
 				if($tmp['status']){
 					foreach($tmp['list'] as $value){
@@ -190,7 +191,7 @@ trait CRUD{
 				$key_arr=[__CLASS__];
 				foreach($query_field as $field){
 					$key_arr[]=$field;
-					$key_arr[]=$arg['where'][$field]?$arg['where'][$field]:"[\d]+?";
+					$key_arr[]=$arg['where'][$field]?$arg['where'][$field]:"[\w]+?";
 				}
 				$key=implode("\.",$key_arr);
 				$where="/{$key}/";
@@ -206,7 +207,6 @@ trait CRUD{
 						Fcache::del($key,$val);
 					}
 				}
-				
 				break;
 		}
 		
