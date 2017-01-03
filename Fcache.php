@@ -4,11 +4,9 @@ class Fcache{
 	//存入的路徑設定
 
 	public static $path;
+	public static $all_keys;
 	private function __construct(){
 		self::$path=__DIR__."/.Fcache/";
-		if(empty(self::$path)){
-			throw Exception("need set path");
-		}
 	}
 	
 	public static function init(){
@@ -40,6 +38,7 @@ class Fcache{
 		}
 		return false;		
 	}
+	
 	//功能:設定快取 $cache_key快取鍵值 $cache_data快取資料
 	public static function set($key_name,$cache_data){
 		self::init();
@@ -51,7 +50,10 @@ class Fcache{
 		}
 		$path_arr[]=$key_name;
 		$dir_path=implode("/",$path_arr);
-		return file_put_contents($dir_path,json_encode($cache_data));							
+		
+		file_put_contents($dir_path,json_encode($cache_data));
+
+		return true;
 	}
 	//功能:刪除快取 $cache_key快取鍵值  
 	public static function del($key_name){
@@ -66,14 +68,32 @@ class Fcache{
 		}
 		return false;
 	}
+	
+	//功能:刪除所有快取
+	public static function del_all(){
+		
+		$where=self::where();
+		
+		foreach($where as $key=>$val){
+			self::del($key);
+		}
+		return $where;
+	}
+	
 	//功能:以鍵值搜尋快取資料
 	public static function where($preg="",$where=[],$not_where=[]){
 		
 		self::init();
 		$path=self::$path;
-		$data=[];
 		
-		exec("find {$path} -name '*' -type f ",$data);
+		if($data=self::$all_keys){
+			$data=self::$all_keys;
+		}else{
+			$data=[];
+			exec("find {$path} -name '*' -type f ",$data);
+			self::$all_keys=$data;
+		}
+		
 		
 		$result=[];		
 		foreach($data as $key_name){
@@ -109,13 +129,19 @@ class Fcache{
 		
 		return $result;
 	}
-	//功能:刪除所有快取
-	public static function del_all(){
+	public static function lock($cache_key,$callback){
+		$dir_path=self::get_dir($cache_key);
+		$path_arr=[];
+		$path_arr[]=$dir_path;
+		$path_arr[]=$key_name;
+		$dir_path=implode("/",$path_arr);
 		
-		$where=self::where();
-		foreach($where as $key=>$val){
-			self::del($key);
-		}
-		return $where;
+		$f=fopen($dir_path,'rw');    
+		flock($f,LOCK_EX);
+		
+		$callback && $callback($cache_key);
+		fclose($f); 
+		
 	}
+	
 }
