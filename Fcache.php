@@ -4,7 +4,6 @@ class Fcache{
 	//存入的路徑設定
 
 	public static $path;
-	public static $all_keys;
 	private function __construct(){
 		self::$path=__DIR__."/.Fcache/";
 	}
@@ -86,13 +85,9 @@ class Fcache{
 		self::init();
 		$path=self::$path;
 		
-		if($data=self::$all_keys){
-			$data=self::$all_keys;
-		}else{
-			$data=[];
-			exec("find {$path} -name '*' -type f ",$data);
-			self::$all_keys=$data;
-		}
+		
+		exec("find {$path} -name '*' -type f ",$data);
+		
 		
 		
 		$result=[];		
@@ -118,10 +113,11 @@ class Fcache{
 						}
 					}
 				}
-				
+				self::lock($key_name);
 				if($value=self::get($key_name)){
 					$result[$key_name]=$value;
 				}
+				self::unlock($key_name);
 			}
 			
 			unset($match);
@@ -129,19 +125,23 @@ class Fcache{
 		
 		return $result;
 	}
-	public static function lock($cache_key,$callback){
+	
+	public static $lock=[];
+	public static function lock($cache_key){
 		$dir_path=self::get_dir($cache_key);
 		$path_arr=[];
 		$path_arr[]=$dir_path;
 		$path_arr[]=$key_name;
 		$dir_path=implode("/",$path_arr);
-		
-		$f=fopen($dir_path,'rw');    
-		flock($f,LOCK_EX);
-		
-		$callback && $callback($cache_key);
-		fclose($f); 
-		
+		if(file_exists($dir_path)){
+			$f=fopen($dir_path,'rw');    
+			flock($f,LOCK_EX);
+			self::$lock[$cache_key]=$f;
+		}
+	}
+	public static function unlock($cache_key){
+		if(self::$lock[$cache_key])
+		fclose(self::$lock[$cache_key]);
 	}
 	
 }

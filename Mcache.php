@@ -95,9 +95,12 @@ class Mcache{
 		}		
 		return $result;						
 	}
-	public static function cas($cache_key,$cache_data,$second=0){
+	public static function cas($cache_key,$callback,$second=0){
 		do {
 			$tmp = self::$con->get($cache_key, null, $cas);
+			if($callback){
+				$cache_data=$callback($tmp);
+			}
 			if (self::$con->getResultCode() == Memcached::RES_NOTFOUND) {
 				self::$con->add($cache_key,$cache_data,$second);
 			} else { 
