@@ -150,32 +150,72 @@ trait CRUD{
 		$preg=implode("\.",$preg_arr);
 		$preg="/{$preg}/";
 		
-		$list=Fcache::where($preg,$where,$not_where);
-		$list=array_values($list);
-		return $list;
+		$count=Fcache::get(__CLASS__.".index_page");
+		
+		$result=[];
+		for($page=0;$page<$count;$page++){
+			$index_page=Fcache::get(__CLASS__.".index_page.{$page}");
+			if($index_page)
+			foreach($index_page as $key_name){
+				if(preg_match($preg,$key_name,$match)){
+					if($match){
+						foreach($not_where as $field=>$array){
+							if($match[$field] && in_array($match[$field],$array)){
+								continue 2;
+							}
+						}
+						foreach($where as $field=>$array){
+							if($match[$field] && !in_array($match[$field],$array)){
+								continue 2;
+							}
+						}
+					}
+					
+					if($value=Cache::get($key_name,30*60)){
+						$result[$key_name]=$value;
+					}
+				}
+			}
+		}
+		return $result;
 	}
-	public static function flushCache($type=0){
+	
+	public static function flushCache($arg=[],$type=0){
 		if(is_array(self::$cache_key_field)){
 			$query_field=self::$cache_key_field;
 		}else{
 			return false;
 		}
+		Fcache::lock(__CLASS__.".index_page");
 		
 		switch($type){
 			case 0://init
+				self::flushIndex([],2);
 				
-				$tmp=self::getList();
-				if($tmp['status']){
-					foreach($tmp['list'] as $value){
-						$key_arr=[__CLASS__];
-						foreach($query_field as $field){
-							$key_arr[]=$field;
-							$key_arr[]=$value[$field];
+				$page=0;
+				$count=500;
+				while(1){
+					$index_array=[];
+					$limit=['page'=>$page,'count'=>$count];
+					$tmp=self::getList(compact("limit"));
+					if($tmp['status']){
+						foreach($tmp['list'] as $value){
+							$key_arr=[__CLASS__];
+							foreach($query_field as $field){
+								$key_arr[]=$field;
+								$key_arr[]=$value[$field];
+							}
+							$key=implode(".",$key_arr);
+							$index_array[]=$key;
+							Cache::set($key,$value,30*60);
 						}
-						$key=implode(".",$key_arr);
-						Fcache::set($key,$value);
+						self::flushIndex($index_array,0);
+					}else{
+						break;
 					}
+					$page++;
 				}
+				Fcache::set(__CLASS__.".index_page",$page,30*60);
 				break;
 			case 1://insert
 				$key_arr=[__CLASS__];
@@ -184,31 +224,77 @@ trait CRUD{
 					$key_arr[]=$arg[$field];
 				}
 				$key=implode(".",$key_arr);
-				Fcache::set($key,$arg);
+				Cache::set($key,$arg,60*30);
+				self::flushIndex([$key],0);
+				
 				break;
+			case 2:case 3://update//delete
 				
-			case 2:case 3://update,delete
-				$key_arr=[__CLASS__];
-				foreach($query_field as $field){
-					$key_arr[]=$field;
-					$key_arr[]=$arg['where'][$field]?$arg['where'][$field]:"[\w]+?";
-				}
-				$key=implode("\.",$key_arr);
-				$where="/{$key}/";
-				
-				$list=Fcache::where($where);
+				$list=self::getCache($arg['where']);
 				foreach($list as $key=>$val){
-					foreach($arg['update'] as $u_key=>$u_val){
-						$val[$u_key]=$u_val;
+					if($arg['update']){
+						foreach($arg['update'] as $u_key=>$u_val){
+							$val[$u_key]=$u_val;
+						}
 					}
 					if($type==2){
-						Fcache::set($key,$val);
+						Cache::set($key,$val,60*30);
 					}else{
-						Fcache::del($key,$val);
+						Cache::del($key);
 					}
+				}
+				if($type==3){
+					self::flushIndex(array_keys($list),1);
 				}
 				break;
 		}
+		Fcache::unlock(__CLASS__.".index_page");
+		
+	}
+	
+	public static function flushIndex($key_array,$type=0){
+		
+		$limit=500;
+		$page=Fcache::get(__CLASS__.".index_page");
+		
+		$array=[];
+		$result=[];
+		for($i=0;$i<$page;$i++){
+			$data=Fcache::get(__CLASS__.".index_page.{$i}");
+			Fcache::del(__CLASS__.".index_page.{$i}");
+			if($type==1){
+				foreach($data as $key=>$val){
+					if(is_numeric(array_search($val,$key_array))){
+						unset($data[$key]);
+					}
+				}
+			}
+			
+			if($type!=2){
+				// var_dump($data);
+				$array=array_merge($array,$data);
+				if(count($array)>=$limit){
+					$result[]=array_splice($array,0,$limit);
+				}
+			}
+		}
+		
+		if($type==0){
+			$array=array_merge($array,$key_array);
+			if(count($array)>=$limit){
+				$result[]=array_splice($array,0,$limit);
+			}
+		}
+		
+		if(count($array)){
+			$result[]=$array;
+		}
+		
+		foreach($result as $key=>$val){
+			Cache::set(__CLASS__.".index_page.{$key}",$val,30*60);
+		}
+		
+		Cache::set(__CLASS__.".index_page",count($result),30*60);
 		
 	}
 }
