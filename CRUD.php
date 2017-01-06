@@ -82,6 +82,7 @@ trait CRUD{
 	}
 	
 	public static function insert($insert){
+		Fcache::lock(__CLASS__.".index_page");
 		
 		$insert=self::filter_field($insert);
 		if($id=DB::insert($insert,self::$table)){
@@ -95,9 +96,11 @@ trait CRUD{
 			$status=false;
 			$message="新增失敗";
 		}
+		Fcache::unlock(__CLASS__.".index_page");
 		return compact(['status','message','insert']);
 	}
 	public static function update($arg){
+		Fcache::lock(__CLASS__.".index_page");
 		$update=self::filter_field($arg['update']);
 		$where=self::filter_field($arg['where']);
 		
@@ -110,9 +113,11 @@ trait CRUD{
 			$status=false;
 			$message="修改失敗";
 		}
+		Fcache::unlock(__CLASS__.".index_page");
 		return compact(['status','message','arg','update','where']);
 	}
 	public static function delete($where){
+		Fcache::lock(__CLASS__.".index_page");
 		$where=self::filter_field($where);
 		if(DB::delete($where,self::$table)){
 			$status=true;
@@ -122,8 +127,10 @@ trait CRUD{
 			$status=false;
 			$message="刪除失敗";
 		}
+		Fcache::unlock(__CLASS__.".index_page");
 		return compact(['status','message']);
 	}
+	
 	public static function getCache($where=[],$not_where=[]){
 		$query_field=self::$cache_key_field;
 		if(!is_array($query_field))return false;
@@ -150,11 +157,11 @@ trait CRUD{
 		$preg=implode("\.",$preg_arr);
 		$preg="/{$preg}/";
 		
-		$count=Fcache::get(__CLASS__.".index_page");
+		$count=Cache::get(__CLASS__.".index_page");
 		
 		$result=[];
 		for($page=0;$page<$count;$page++){
-			$index_page=Fcache::get(__CLASS__.".index_page.{$page}");
+			$index_page=Cache::get(__CLASS__.".index_page.{$page}");
 			if($index_page)
 			foreach($index_page as $key_name){
 				if(preg_match($preg,$key_name,$match)){
@@ -179,21 +186,20 @@ trait CRUD{
 		}
 		return $result;
 	}
-	
+	public static $limit=500;
 	public static function flushCache($arg=[],$type=0){
 		if(is_array(self::$cache_key_field)){
 			$query_field=self::$cache_key_field;
 		}else{
 			return false;
 		}
-		Fcache::lock(__CLASS__.".index_page");
 		
 		switch($type){
 			case 0://init
-				self::flushIndex([],2);
+				self::flushIndex([],0);
 				
 				$page=0;
-				$count=500;
+				$count=self::$limit;
 				while(1){
 					$index_array=[];
 					$limit=['page'=>$page,'count'=>$count];
@@ -209,7 +215,7 @@ trait CRUD{
 							$index_array[]=$key;
 							Cache::set($key,$value,30*60);
 						}
-						self::flushIndex($index_array,0);
+						self::flushIndex($index_array,1);
 					}else{
 						break;
 					}
@@ -225,11 +231,11 @@ trait CRUD{
 				}
 				$key=implode(".",$key_arr);
 				Cache::set($key,$arg,60*30);
-				self::flushIndex([$key],0);
+				self::flushIndex([$key],1);
 				
 				break;
 			case 2:case 3://update//delete
-				
+				$update_index=[];
 				$list=self::getCache($arg['where']);
 				foreach($list as $key=>$val){
 					if($arg['update']){
@@ -237,32 +243,45 @@ trait CRUD{
 							$val[$u_key]=$u_val;
 						}
 					}
+					
 					if($type==2){
+						$key_arr=[__CLASS__];
+						foreach($query_field as $field){
+							$key_arr[]=$field;
+							$key_arr[]=$val[$field];
+						}
+						$key=implode(".",$key_arr);
 						Cache::set($key,$val,60*30);
+						$update_index[]=$key;
 					}else{
 						Cache::del($key);
 					}
 				}
-				if($type==3){
-					self::flushIndex(array_keys($list),1);
+				self::flushIndex(array_keys($list),2);
+				if(count($update_index)){
+					self::flushIndex($update_index,1);
 				}
 				break;
 		}
-		Fcache::unlock(__CLASS__.".index_page");
 		
 	}
-	
+	/*
+	type 
+	0:clear
+	1:insert
+	2:delete 
+	*/
 	public static function flushIndex($key_array,$type=0){
 		
-		$limit=500;
-		$page=Fcache::get(__CLASS__.".index_page");
+		$limit=self::$limit;
+		$page=Cache::get(__CLASS__.".index_page");
 		
 		$array=[];
 		$result=[];
 		for($i=0;$i<$page;$i++){
-			$data=Fcache::get(__CLASS__.".index_page.{$i}");
-			Fcache::del(__CLASS__.".index_page.{$i}");
-			if($type==1){
+			$data=Cache::get(__CLASS__.".index_page.{$i}");
+			Cache::del(__CLASS__.".index_page.{$i}");
+			if($type==2){
 				foreach($data as $key=>$val){
 					if(is_numeric(array_search($val,$key_array))){
 						unset($data[$key]);
@@ -270,17 +289,20 @@ trait CRUD{
 				}
 			}
 			
-			if($type!=2){
-				// var_dump($data);
-				$array=array_merge($array,$data);
+			if($type!=0){
+				foreach($data as $val){
+					$array[]=$val;
+				}
 				if(count($array)>=$limit){
 					$result[]=array_splice($array,0,$limit);
 				}
 			}
 		}
 		
-		if($type==0){
-			$array=array_merge($array,$key_array);
+		if($type==1){
+			foreach($key_array as $val){
+				$array[]=$val;
+			}
 			if(count($array)>=$limit){
 				$result[]=array_splice($array,0,$limit);
 			}
@@ -291,10 +313,9 @@ trait CRUD{
 		}
 		
 		foreach($result as $key=>$val){
-			Cache::set(__CLASS__.".index_page.{$key}",$val,30*60);
+			Cache::set(__CLASS__.".index_page.{$key}",$val);
 		}
 		
-		Cache::set(__CLASS__.".index_page",count($result),30*60);
-		
+		Cache::set(__CLASS__.".index_page",count($result));
 	}
 }
