@@ -140,8 +140,10 @@ class Fcache{
 		}
 	}
 	public static function unlock($cache_key){
-		if(self::$lock[$cache_key])
-		fclose(self::$lock[$cache_key]);
+		if(self::$lock[$cache_key]){
+			// flock(self::$lock[$cache_key], LOCK_UN);
+			fclose(self::$lock[$cache_key]);
+		}
 	}
 	
 }
