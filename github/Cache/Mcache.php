@@ -37,9 +37,13 @@ class Mcache{
 		return $cache_data;
 	}
 	//功能:設定快取 $cache_key快取鍵值 $cache_data快取資料 $second快取時間
-	public static function set($cache_key,$cache_data,$second=0){
+	public static function set($cache_key,$cache_data,$second=0,$lock=false){
 		self::init();	
-		return self::$con->set($cache_key,$cache_data,$second);
+		if($lock){
+			return self::cas($cache_key,$cache_data,$second);
+		}else{
+			return self::$con->set($cache_key,$cache_data,$second);
+		}
 	}
 	
 	//功能:刪除快取 $cache_key快取鍵值  $second刪除時間
@@ -84,6 +88,9 @@ class Mcache{
 						if($value=self::get($key_name)){
 							$result[$key_name]=$value;
 						}
+						if($value=self::get($key_name)){
+							$result[$key_name]=$value;
+						}
 					}
 					unset($match);
 				}
@@ -91,4 +98,19 @@ class Mcache{
 		}		
 		return $result;						
 	}
+	public static function cas($cache_key,$callback,$second=0){
+		do {
+			$tmp = self::$con->get($cache_key, null, $cas);
+			if($callback){
+				$cache_data=$callback($tmp);
+			}
+			if (self::$con->getResultCode() == Memcached::RES_NOTFOUND) {
+				self::$con->add($cache_key,$cache_data,$second);
+			} else { 
+				$result=self::$con->cas($cas,$cache_key,$cache_data,$second);
+			}   
+		}while (self::$con->getResultCode() != Memcached::RES_SUCCESS);
+		return $result;
+	}
+
 }
