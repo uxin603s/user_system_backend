@@ -44,7 +44,7 @@ class UserList{
 	}
 	public static function compactUser($access_token){
 		
-		if($tmp=UserList::getCache(["access_token"=>$access_token])){
+		if($tmp=UserList::getCache(["access_token"=>$access_token,'status'=>[1]])){
 			$result=$tmp[0];
 			$result['rid']=[];
 			if($UserRole=UserRole::getCache(["uid"=>$result['id']])){
