@@ -45,12 +45,10 @@ class UserList{
 	public static function compactUser($access_token){
 		
 		if($tmp=UserList::getCache(["access_token"=>$access_token,'status'=>[1]])){
-			$result=$tmp[0];
+			$result=array_pop($tmp);
 			$result['rid']=[];
 			if($UserRole=UserRole::getCache(["uid"=>$result['id']])){
-				
 				$result['rid']=array_column($UserRole,'rid');
-				
 				$result['data']=[];
 				$result['role']=[];
 				$result['role_user']=[];
@@ -63,9 +61,9 @@ class UserList{
 					}
 					
 					if($RoleList=RoleList::getCache(['id'=>$rid])){
-						$result['role'][$rid]=$RoleList[0];
-						if($WebList=WebList::getCache(['id'=>$RoleList[0]['wid']])){
-							$result['web'][$rid][$RoleList[0]['wid']]=$WebList;
+						$result['role'][$rid]=array_pop($RoleList);
+						if($WebList=WebList::getCache(['id'=>$result['role'][$rid]['wid']])){
+							$result['web'][$rid][$result['role'][$rid]['wid']]=$WebList;
 						}
 					}
 					
@@ -73,9 +71,10 @@ class UserList{
 					if($UserRole=UserRole::getCache(['rid'=>$rid])){
 						foreach($UserRole as $item){
 							if($UserList=UserList::getCache(["id"=>$item['uid']])){
+								$tmp=array_pop($UserList);
 								$RoleUser[]=[
-									"id"=>$UserList[0]['id'],
-									"name"=>$UserList[0]['name'],
+									"id"=>$tmp['id'],
+									"name"=>$tmp['name'],
 								];
 							}
 						}

@@ -2,6 +2,8 @@
 include_once __DIR__."/include.php";
 //快取初始化
 
+// var_dump(UserRole::getCache());
+// exit;
 // Cache::del_all();
 UserList::flushCache();
 UserRole::flushCache();
