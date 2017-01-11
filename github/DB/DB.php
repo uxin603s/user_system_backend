@@ -74,20 +74,21 @@ class DB{
 			$bind_data[]=$value;
 		}
 		$values[]="(".implode(',',array_fill(0,count($insert),'?')).")";
-		
-		
+
 		$field_str=implode(',',$fields);
 		$value_str=implode(',',$values);
 		
 		$sql="insert into `{$table_name}` ({$field_str}) values {$value_str}";
 		$query=self::query($sql,$bind_data);
 		
-		
-		if(self::$connect->lastInsertId()){
-			return self::$connect->lastInsertId();
+		if($query->rowCount()){
+			if(self::$connect->lastInsertId()){
+				return self::$connect->lastInsertId();
+			}
+			return true;
+		}else{
+			return false;
 		}
-		
-		return ($query->rowCount())?true:false;
 	}
 	
 	public static function update($update,$where,$table_name=""){//修改
