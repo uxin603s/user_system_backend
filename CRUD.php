@@ -130,72 +130,111 @@ trait CRUD{
 		Fcache::unlock(__CLASS__.".index_page");
 		return compact(['status','message']);
 	}
-	
-	public static function getCache($arg=[]){
-		if($arg['where']){
-			$where=$arg['where'];
-		}else{
-			$where=[];
-		}
-		if($arg['not_where']){
-			$not_where=$arg['not_where'];
-		}else{
-			$not_where=[];
-		}
-		if($arg['limit']){
-			$limit=$arg['limit'];
-		}else{
-			$limit=['count'=>200,'page'=>0,'rand'=>false,'sort'=>false,];
-		}
-		$query_field=self::$cache_key_field;
-		if(!is_array($query_field))return false;
+	public static function getPreg($arg){
 		$preg_arr=[__CLASS__];
-		foreach($query_field as $field){
+		foreach(self::$cache_key_field as $field){
 			$preg_arr[]=$field;
 			
-			if(!is_array($where[$field])){
-				if(isset($where[$field])){
-					$preg_arr[]=$where[$field];
+			if(is_array($arg['where'][$field])){
+				$preg_arr[]="(?P<{$field}>[\w]+?)";
+			}else{
+				if(isset($arg['where'][$field])){
+					$preg_arr[]=$arg['where'][$field];
 				}else{
 					$preg_arr[]="(?P<{$field}>[\w]+?)";
 				}
-			}else{
-				$preg_arr[]="(?P<{$field}>[\w]+?)";
 			}
-			if(!is_array($where[$field])){
-				unset($where[$field]);
+			
+			if(!is_array($arg['where'][$field])){
+				unset($arg['where'][$field]);
 			}
-			if(!is_array($not_where[$field])){
-				unset($not_where[$field]);
+			if(!is_array($arg['not_where'][$field])){
+				unset($arg['not_where'][$field]);
 			}
 		}
 		$preg=implode("\.",$preg_arr);
-		$preg="/^{$preg}$/";
-		
-		$count=Cache::get(__CLASS__.".index_page")-1;
+		return $preg="/^{$preg}$/";
+	}
+	public static function getCache($arg=[]){
+		if(!$arg['where']){
+			$arg['where']=[];
+		}
+		if(!$arg['not_where']){
+			$arg['not_where']=[];
+		}
+		if(!$arg['limit']){
+			$arg['limit']=['count'=>200,'page'=>0,'rand'=>false,'sort'=>false,];
+		}
+		$preg=self::getPreg(['where'=>$arg['where'],'not_where'=>$arg['not_where']]);
+		// var_dump($preg);
+		// exit;
+		$count=Cache::get(__CLASS__.".index_page");
 		
 		$result=[];
+		$group=[];
 		$total=0;
-		$pages=range(0,$count);
+		$pages=range(0,$count-1);
 		
-		if($limit['sort']){
+		if($arg['limit']['sort']){
 			$pages=array_reverse($pages);
 		}
-		if($limit['rand']){
+		if($arg['limit']['rand']){
 			shuffle($pages);
 		}
+		
 		foreach($pages as $page){
 			$index_page=Cache::get(__CLASS__.".index_page.{$page}");
 			if($index_page)
 			foreach($index_page as $key_name){
 				if(preg_match($preg,$key_name,$match)){
 					if($match){
-						foreach($not_where as $field=>$array){
+						if($arg['group'] && $arg['required']){
+							if($jump[$match[$arg['group'][0]]]){
+								continue 1;
+							}
+							
+							$group[$match[$arg['group'][0]]][$match[$arg['group'][1]]]=$key_name;
+							$tmp_count=0;
+							
+							if($arg['not_required'])
+							foreach($arg['not_required'] as $not_required){
+								if($group[$match[$arg['group'][0]]][$not_required]){
+									continue 1;
+								}
+							}
+							
+							if($arg['required'])
+							foreach($arg['required'] as $required){
+								// var_dump($group[$match[$arg['group'][0]]][$required]);
+								if($group[$match[$arg['group'][0]]][$required]){
+									$tmp_count++;
+								}
+							}
+							// var_dump($tmp_count);
+							if(count($arg['required'])==$tmp_count){
+								
+								if(($arg['limit']['count']*$arg['limit']['page'])<=$total){
+									// $result[$match[$arg['group'][0]]]=$group[$match[$arg['group'][0]]];
+									$result[$match[$arg['group'][0]]]=$match[$arg['group'][0]];
+								}else{
+									$jump[$match[$arg['group'][0]]]=$match[$arg['group'][0]];
+								}
+								
+								if(count($result)>=$arg['limit']['count']){
+									break 2;
+								}
+								
+								++$total;
+							}
+							
+							continue 1;
+						}
+						foreach($arg['not_where'] as $field=>$array){
 							if($match[$field] && in_array($match[$field],$array)){
 								continue 2;
 							}
 						}
-						foreach($where as $field=>$array){
+						foreach($arg['where'] as $field=>$array){
 							if($match[$field] && !in_array($match[$field],$array)){
 								continue 2;
 							}
@@ -204,20 +243,20 @@ trait CRUD{
 					
 					
 					
-					if(($limit['count']*$limit['page'])<=$total){
+					if(($arg['limit']['count']*$arg['limit']['page'])<=$total){
 						if($value=Cache::get($key_name,30*60)){
 							$result[$key_name]=$value;
 						}
 					}
-					if(count($result)>=$limit['count']){
+					if(count($result)>=$arg['limit']['count']){
 						break 2;
 					}
 					
 					++$total;
 				}
 			}
-			
 		}
+		// var_dump($result);
 		return $result;
 	}
 	public static $limit=500;
