@@ -131,7 +131,22 @@ trait CRUD{
 		return compact(['status','message']);
 	}
 	
-	public static function getCache($where=[],$not_where=[],$limit=['count'=>200,'page'=>0,'rand'=>false,'sort'=>false,]){
+	public static function getCache($arg=[]){
+		if($arg['where']){
+			$where=$arg['where'];
+		}else{
+			$where=[];
+		}
+		if($arg['not_where']){
+			$not_where=$arg['not_where'];
+		}else{
+			$not_where=[];
+		}
+		if($arg['limit']){
+			$limit=$arg['limit'];
+		}else{
+			$limit=['count'=>200,'page'=>0,'rand'=>false,'sort'=>false,];
+		}
 		$query_field=self::$cache_key_field;
 		if(!is_array($query_field))return false;
 		$preg_arr=[__CLASS__];
@@ -256,7 +271,7 @@ trait CRUD{
 				break;
 			case 2:case 3://update//delete
 				$update_index=[];
-				$list=self::getCache($arg['where']);
+				$list=self::getCache(['where'=>$arg['where']]);
 				foreach($list as $key=>$val){
 					if($arg['update']){
 						foreach($arg['update'] as $u_key=>$u_val){

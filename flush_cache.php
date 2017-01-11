@@ -13,9 +13,7 @@ DataList::flushCache();
 WebList::flushCache();
 FbRegisterList::flushCache();
 // UserList::reset_session();
-
-
-$list=UserList::getCache(['id'=>9,'status'=>1]);
+$list=UserList::getCache(['where'=>['id'=>9,'status'=>1]]);
 // var_dump($list);
 // exit;	
 foreach($list as $val){	

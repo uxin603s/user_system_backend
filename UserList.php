@@ -44,10 +44,11 @@ class UserList{
 	}
 	public static function compactUser($access_token){
 		
-		if($tmp=UserList::getCache(["access_token"=>$access_token,'status'=>[1]])){
+		if($tmp=UserList::getCache(["where"=>["access_token"=>$access_token,'status'=>1]])){
+			
 			$result=array_pop($tmp);
 			$result['rid']=[];
-			if($UserRole=UserRole::getCache(["uid"=>$result['id']])){
+			if($UserRole=UserRole::getCache(["where"=>["uid"=>$result['id']]])){
 				$result['rid']=array_column($UserRole,'rid');
 				$result['data']=[];
 				$result['role']=[];
@@ -56,21 +57,21 @@ class UserList{
 				
 				foreach($result['rid'] as $rid){
 					
-					if($RoleData=RoleData::getCache(['rid'=>$rid])){
+					if($RoleData=RoleData::getCache(["where"=>['rid'=>$rid]])){
 						$result['data'][$rid]=$RoleData;
 					}
 					
-					if($RoleList=RoleList::getCache(['id'=>$rid])){
+					if($RoleList=RoleList::getCache(["where"=>['id'=>$rid]])){
 						$result['role'][$rid]=array_pop($RoleList);
-						if($WebList=WebList::getCache(['id'=>$result['role'][$rid]['wid']])){
+						if($WebList=WebList::getCache(["where"=>['id'=>$result['role'][$rid]['wid']]])){
 							$result['web'][$rid][$result['role'][$rid]['wid']]=$WebList;
 						}
 					}
 					
 					$RoleUser=[];
-					if($UserRole=UserRole::getCache(['rid'=>$rid])){
+					if($UserRole=UserRole::getCache(["where"=>['rid'=>$rid]])){
 						foreach($UserRole as $item){
-							if($UserList=UserList::getCache(["id"=>$item['uid']])){
+							if($UserList=UserList::getCache(["where"=>["id"=>$item['uid']]])){
 								$tmp=array_pop($UserList);
 								$RoleUser[]=[
 									"id"=>$tmp['id'],
