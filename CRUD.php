@@ -236,8 +236,8 @@ trait CRUD{
 				$count=self::$limit;
 				while(1){
 					$index_array=[];
-					$limit=['page'=>$page,'count'=>$count];
-					$tmp=self::getList(compact("limit"));
+					$arg['limit']=['page'=>$page,'count'=>$count];
+					$tmp=self::getList($arg);
 					if($tmp['status']){
 						foreach($tmp['list'] as $value){
 							$key_arr=[__CLASS__];
