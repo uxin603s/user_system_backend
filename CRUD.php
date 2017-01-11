@@ -131,7 +131,7 @@ trait CRUD{
 		return compact(['status','message']);
 	}
 	
-	public static function getCache($where=[],$not_where=[]){
+	public static function getCache($where=[],$not_where=[],$limit=['count'=>200,'page'=>0,'rand'=>false,'sort'=>false,]){
 		$query_field=self::$cache_key_field;
 		if(!is_array($query_field))return false;
 		$preg_arr=[__CLASS__];
@@ -155,12 +155,21 @@ trait CRUD{
 			}
 		}
 		$preg=implode("\.",$preg_arr);
-		$preg="/{$preg}/";
+		$preg="/^{$preg}$/";
 		
-		$count=Cache::get(__CLASS__.".index_page");
+		$count=Cache::get(__CLASS__.".index_page")-1;
 		
 		$result=[];
-		for($page=0;$page<$count;$page++){
+		$total=0;
+		$pages=range(0,$count);
+		
+		if($limit['sort']){
+			$pages=array_reverse($pages);
+		}
+		if($limit['rand']){
+			shuffle($pages);
+		}
+		foreach($pages as $page){
 			$index_page=Cache::get(__CLASS__.".index_page.{$page}");
 			if($index_page)
 			foreach($index_page as $key_name){
@@ -178,11 +187,21 @@ trait CRUD{
 						}
 					}
 					
-					if($value=Cache::get($key_name,30*60)){
-						$result[$key_name]=$value;
+					
+					
+					if(($limit['count']*$limit['page'])<=$total){
+						if($value=Cache::get($key_name,30*60)){
+							$result[$key_name]=$value;
+						}
 					}
+					if(count($result)>=$limit['count']){
+						break 2;
+					}
+					
+					++$total;
 				}
 			}
+			
 		}
 		return $result;
 	}
@@ -220,8 +239,9 @@ trait CRUD{
 						break;
 					}
 					$page++;
+					var_dump($page);
 				}
-				Fcache::set(__CLASS__.".index_page",$page,30*60);
+				Cache::set(__CLASS__.".index_page",$page,30*60);
 				break;
 			case 1://insert
 				$key_arr=[__CLASS__];
