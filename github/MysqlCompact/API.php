@@ -12,5 +12,6 @@ if(isset($_REQUEST['func_name'])){
 			$arg=$array;
 		}
 	}
-	echo @json_encode(call_user_func($func_name,$arg),JSON_NUMERIC_CHECK);
+	echo @json_encode(call_user_func($func_name,$arg));//JSON_BIGINT_AS_STRING|JSON_NUMERIC_CHECK
+	// echo @json_encode(call_user_func($func_name,$arg));
 }

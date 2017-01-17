@@ -21,4 +21,3 @@ include_once __DIR__."/UserRole.php";
 include_once __DIR__."/BlockList.php";
 
 Mcache::$prefix="cfd_chichi_user";
-DB::query("SET NAMES utf8");

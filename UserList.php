@@ -6,8 +6,8 @@ class UserList{
 	use CRUD{
 		CRUD::flushCache as private tmp_flushCache;	
 	}
-	public static function flushCache(){
-		self::tmp_flushCache();
+	public static function flushCache($arg,$type){
+		self::tmp_flushCache($arg,$type);
 		// UserList::reset_session();
 	}
 	public static function getAccessToken(){
@@ -100,12 +100,14 @@ class UserList{
 		if($list=Fcache::where("userSystem_")){
 			foreach($list as $val){
 				$access_token=$val['access_token'];
+				$old_data=Fcache::get("userSystem_{$access_token}");
 				$session_id=$val['session_id'];
 				session_id($session_id);
 				session_start();
 				$_SESSION=self::compactUser($access_token);
 				$_SESSION['session_id']=$session_id;
-				Fcache::set("userSystem_{$access_token}",$data);
+				$_SESSION['REMOTE_ADDR']=$old_data['REMOTE_ADDR'];
+				Fcache::set("userSystem_{$access_token}",$_SESSION);
 				session_write_close();
 			}
 		}

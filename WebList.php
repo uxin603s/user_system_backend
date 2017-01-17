@@ -6,8 +6,8 @@ class WebList{
 	use CRUD{
 		CRUD::flushCache as private tmp_flushCache;	
 	}
-	public static function flushCache(){
-		self::tmp_flushCache();
+	public static function flushCache($arg,$type){
+		self::tmp_flushCache($arg,$type);
 		UserList::reset_session();
 	}
 }

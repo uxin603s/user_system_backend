@@ -2,9 +2,7 @@
 include_once __DIR__."/include.php";
 
 session_start();
-// session_write_close();
 UserSystemHelp::checkSession();
-
 if(isset($_SESSION['rid']) && in_array(0,$_SESSION['rid'])){
 	
 }else{
