@@ -40,7 +40,7 @@ class MysqlCompact{
 				$symbol=self::$type_list[$type];
 				//欄位白名單
 				if($symbol){
-					if(in_array($field,$and_array) || in_array($type,[4,5])){
+					if(in_array($field,$and_array) || in_array($type,[1,3,4,5])){
 						$query_str.=" && {$field} {$symbol} ?";
 						$bind_data[]=$value;
 					}else if(in_array($field,$or_array)){
