@@ -31,6 +31,7 @@ class UserSystemHelp{
 				$result['status']=false;
 				$result['message']="access_token不符合規定";
 			}
+			setcookie("access_token","",time()-60*60);
 			
 			if(is_callable($error) && !$result['status']){
 				call_user_func($error,$result['message']);
@@ -68,6 +69,7 @@ class UserSystemHelp{
 		session_write_close();
 		
 		//data寫入快取方便主站掛點時利用 及主站 刷新外部網站用
+		
 		Fcache::set("userSystem_{$access_token}",$data);
 		setcookie("access_token",$access_token,time()+60*60);
 		//data找導頁資料並導頁
@@ -107,6 +109,7 @@ class UserSystemHelp{
 	public static function checkSession(){
 		if($_SESSION['access_token']){
 			$data=Fcache::get("userSystem_{$_SESSION['access_token']}");
+			
 			$message=[];
 			$status=true;
 			if(session_id()!=$data['session_id']){
@@ -121,7 +124,7 @@ class UserSystemHelp{
 				session_destroy();
 				$message=implode(",",$message);
 				$reload=1;
-				$result=compact(['status',"message","reload"]);
+				$result=compact(['status',"message","reload","data"]);
 				echo json_encode($result);
 				exit;
 			}
