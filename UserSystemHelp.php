@@ -3,10 +3,15 @@ class UserSystemHelp{
 	public static $location=true;
 	public static $local=false;
 	public static function getConfig(){
-		return json_decode(file_get_contents(__DIR__."/config.json"),1);
+		$path=__DIR__."/config.json";
+		if(file_exists($path)){
+			return json_decode(file_get_contents($path),1);
+		}else{
+			throw new Exception("config不存在");
+		}
 	}
 	public static function login($success="UserSystemHelp::success",$error="UserSystemHelp::error"){
-		$config=getConfig();
+		$config=self::getConfig();
 		$base_path=$config['base_path'];
 		$white_path=$config['white_path'];
 		
@@ -92,7 +97,7 @@ class UserSystemHelp{
 		var_dump($message);
 	}
 	public static function flushData(){
-		$config=getConfig();
+		$config=self::getConfig();
 		$base_path=$config['base_path'];
 		$white_path=$config['white_path'];
 		
