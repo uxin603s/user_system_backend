@@ -5,7 +5,7 @@ class DB{
 	public static $config=[];
 	
 	private function __construct(){
-		self::$config=json_decode(file_get_contents(__DIR__."/DB.json"),1);
+		self::$config=json_decode(file_get_contents(__DIR__."/config.json"),1);
 		$dbName=self::$config['dbName'];
 		$user=self::$config['user'];
 		$password=self::$config['password'];
