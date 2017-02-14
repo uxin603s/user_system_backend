@@ -2,8 +2,14 @@
 class UserSystemHelp{
 	public static $location=true;
 	public static $local=false;
+	public static function getConfig(){
+		return json_decode(file_get_contents(__DIR__."/config.json"),1);
+	}
 	public static function login($success="UserSystemHelp::success",$error="UserSystemHelp::error"){
-		setcookie("access_token","",time()-60*60);
+		$config=getConfig();
+		$base_path=$config['base_path'];
+		$white_path=$config['white_path'];
+		
 		if(self::$local){
 			$data['rid']=[0];
 			UserSystemHelp::success($data);
@@ -12,7 +18,7 @@ class UserSystemHelp{
 		if(isset($_REQUEST['access_token'])){
 			if(mb_strlen($_REQUEST['access_token'])==32 && preg_match("/^[a-z0-9]+$/",$_REQUEST['access_token'])){
 				$ip=$_SERVER['REMOTE_ADDR'];
-				$url="http://user.cfd888.info/api.php?access_token={$_REQUEST['access_token']}&ip={$ip}";
+				$url="{$base_path}/api.php?access_token={$_REQUEST['access_token']}&ip={$ip}";
 				ob_start();
 				$result=json_decode(file_get_contents($url),1);
 				ob_get_clean();
@@ -45,7 +51,7 @@ class UserSystemHelp{
 		}
 		else{
 			$go_to=urlencode("http://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}");
-			$url="http://user.cfd888.info/login.php?go_to={$go_to}";
+			$url="{$base_path}/login.php?go_to={$go_to}";
 			header("location: {$url}");
 		}
 	}
@@ -75,6 +81,7 @@ class UserSystemHelp{
 		//data找導頁資料並導頁
 		if(self::$location){
 			header("location: {$go_to}");
+			exit;
 		}
 		
 	}
@@ -85,8 +92,11 @@ class UserSystemHelp{
 		var_dump($message);
 	}
 	public static function flushData(){
-		$white_ip=json_decode(file_get_contents(__DIR__."/white_ip.json"),1);
-		if(in_array($_SERVER['REMOTE_ADDR'],$white_ip)){
+		$config=getConfig();
+		$base_path=$config['base_path'];
+		$white_path=$config['white_path'];
+		
+		if($_SERVER['REMOTE_ADDR']==$white_path){
 			$list=Fcache::where("userSystem_");
 			//找access_token與session_id關聯
 			//並重新回主站要資料重新寫入
