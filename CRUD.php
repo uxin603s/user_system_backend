@@ -128,7 +128,7 @@ trait CRUD{
 			$message="刪除失敗";
 		}
 		Fcache::unlock(__CLASS__.".index_page");
-		return compact(['status','message']);
+		return compact(['status','message','where']);
 	}
 	
 	public static function getCache($arg=[]){
