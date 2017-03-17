@@ -3,7 +3,7 @@ include_once __DIR__."/github/DB/DB.php";
 include_once __DIR__."/github/MysqlCompact/MysqlCompact.php";
 include_once __DIR__."/github/MysqlCompact/CRUD.php";
 include_once __DIR__."/github/View/View.php";
-include_once __DIR__."/github/SessionSW/SessionSW.php";
+
 include_once __DIR__."/github/UserSystemHelp/UserSystemHelp.php";
 
 

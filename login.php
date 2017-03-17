@@ -1,8 +1,6 @@
 <?php
 include_once __DIR__."/include.php";
 
-
-
 $hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
 
 if(in_array(gethostname(),$hostname)){
