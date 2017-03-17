@@ -6,12 +6,17 @@ $array=[
 "password",
 "host",
 ];
-foreach($array as $val){
-	echo "請設定{$val}:";
-	$$val=stream_get_line(STDIN, 1024, PHP_EOL);
+foreach($array as $field){
+	echo "請設定{$field}:";
+	$$field=stream_get_line(STDIN, 1024, PHP_EOL);
 	echo "\n";
 }
 
-$data=compact($array);
-var_dump($data);
-file_put_contents(__DIR__."/config.json",json_encode($data));
+$path=__DIR__."/config.json";
+if(file_exists($path)){
+	$data=json_decode(file_get_contents($path),1);
+}
+foreach($array as $field){
+	$data[$field]=$$field;
+}
+file_put_contents($path,json_encode($data));
