@@ -4,7 +4,7 @@ include_once __DIR__."/include.php";
 
 session_start();
 
-if($Config['location']==1){
+if($Config['local']==1){
 	
 }else{
 	if(isset($_SESSION['rid']) && in_array(0,$_SESSION['rid'])){

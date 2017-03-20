@@ -6,7 +6,7 @@ $array=[
 	['field'=>"user","message"=>"請設定資料庫使用者",],
 	['field'=>"password","message"=>"請設定資料庫密碼",],
 	['field'=>"host","message"=>"請設定資料庫網址",],
-	['field'=>"location","message"=>"是否為本機:",],
+	['field'=>"local","message"=>"是否為本機:",],
 	['field'=>"FB.id","message"=>"fb_id:",],
 	['field'=>"FB.secret","message"=>"fb_secret:",],
 	['field'=>"Mcache.prefix","message"=>"Mcache.prefix:",],

@@ -1,7 +1,7 @@
 <?php
 include_once __DIR__."/include.php";
 
-if($Config['location']==1){
+if($Config['local']==1){
 	UserSystemHelp::$local=true;
 	UserSystemHelp::login();
 }
@@ -34,7 +34,7 @@ if(isset($_GET['code'])){
 			DB::insert($data,"fb_register_list");			
 		}
 		
-		$tmp=DB::select("select * from user_list where fb_id = ?  ",[$data['id']]);
+		$tmp=DB::select("select * from user_list where id = ?  ",[$data['uid']]);
 		
 		$status_arr=["空缺","在職","離職"];
 		if($tmp && $tmp[0]['status']==1){

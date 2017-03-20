@@ -20,29 +20,20 @@ class UserList{
 			];
 			$result=self::getList(compact(['where_list']));
 		}while($result['status']);
-		$status=true;
-		return compact(["status","access_token"]);
+		return $access_token;
 	}
+	public static function resetAccessToken($arg){
+		$update=[];
+		$update['access_token']=self::getAccessToken();
+		$where=$arg;
+		return self::update(compact(['update','where']));
+	}
+	
 	public static function insert($arg){
-		$arg['status']=0;
+		$arg['status']="0";
 		$arg['created_time_int']=time();
-		
-		$result=self::tmp_insert($arg);
-		
-		$access_token=getAccessToken();
-		$update=[
-			'fb_id'=>$result['insert']['id'],
-			'access_token'=>$access_token,
-		];
-		$where=[
-			'id'=>$result['insert']['id'],
-		];
-		$update_result=self::update(compact(['update','where']));
-		
-		
-		$result['insert']['access_token']=$access_token;
-		$result['insert']['fb_id']=$result['insert']['id'];
-		return $result;
+		$arg['access_token']=self::getAccessToken();
+		return self::tmp_insert($arg);
 	}
 	public static function compactUser($access_token){
 		$result=false;

@@ -69,7 +69,7 @@ class UserSystemHelp{
 		}else if($_COOKIE['go_to']){
 			$go_to=$_COOKIE['go_to'];
 		}else{
-			$go_to="/index.php";
+			$go_to="index.php";
 		}
 		
 		//寫入session
