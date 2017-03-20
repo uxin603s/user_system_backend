@@ -122,7 +122,7 @@ class UserSystemHelp{
 		}
 	}
 	public static function checkSession(){
-		if($_SESSION['access_token']){
+		if(isset($_SESSION['access_token'])){
 			$data=Fcache::get("userSystem_{$_SESSION['access_token']}");
 			
 			$message=[];

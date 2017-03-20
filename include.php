@@ -20,4 +20,7 @@ include_once __DIR__."/RoleData.php";
 include_once __DIR__."/UserRole.php";
 include_once __DIR__."/BlockList.php";
 
-Mcache::$prefix="cfd_chichi_user";
+
+$Config=json_decode(file_get_contents(__DIR__."/config.json"),1);
+
+Mcache::$prefix=$Config["Mcache.prefix"];

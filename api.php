@@ -1,12 +1,7 @@
 <?php
 include_once __DIR__."/include.php";
 
-$white_list=[
-	"ip"=>json_decode(file_get_contents(__DIR__."/config/ip.json"),1),
-	"hostname"=>json_decode(file_get_contents(__DIR__."/config/hostname.json"),1),
-];
-
-if(in_array($_SERVER['REMOTE_ADDR'],$white_list['ip']) || in_array(gethostname(),$white_list['hostname'])){
+if(in_array($_SERVER['REMOTE_ADDR'],["209.95.33.18"])){
 	if(isset($_GET['ip'])){
 		$_SERVER['REMOTE_ADDR']=$_GET['ip'];
 	}
@@ -21,8 +16,6 @@ $time=0;
 if($tmp=Mcache::get($memcache_key_time)){
 	$time+=($tmp+$lock_time)-(time());
 }
-
-
 
 $login_try=0;
 if($tmp=Mcache::get($memcache_key_count)){

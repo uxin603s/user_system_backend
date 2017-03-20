@@ -1,19 +1,12 @@
 <?php
 include_once __DIR__."/include.php";
 
-$hostname=json_decode(file_get_contents(__DIR__."/config/hostname.json"),1);
-
-if(in_array(gethostname(),$hostname)){
+if($Config['location']==1){
 	UserSystemHelp::$local=true;
 	UserSystemHelp::login();
 }
-
-$FB=json_decode(file_get_contents(__DIR__."/config/FB.json"),1);
-ob_get_clean();
-
-$client_id=$FB['id'];
-$client_secret=$FB['secret'];
-//需要寫導頁
+$client_id=$Config['FB.id'];
+$client_secret=$Config['FB.secret'];
 
 $redirect_uri="http://{$_SERVER['HTTP_HOST']}/login.php";
 if(isset($_GET['go_to'])){
@@ -21,14 +14,12 @@ if(isset($_GET['go_to'])){
 }
 $redirect_uri=urlencode($redirect_uri);
 
-if(isset($_GET['code'])){
-		
+if(isset($_GET['code'])){	
 	$url="https://graph.facebook.com/oauth/access_token?client_id={$client_id}&client_secret={$client_secret}&code={$_GET['code']}&redirect_uri={$redirect_uri}";
 	ob_start();
 	$access_token=file_get_contents($url);
 	ob_get_clean();
-	
-	
+		
 	if($access_token){
 		$url="https://graph.facebook.com/me?fields=id,name,gender,email&".$access_token;
 		ob_start();
@@ -40,9 +31,7 @@ if(isset($_GET['code'])){
 			$data=$tmp[0];
 		}else{
 			$data['created_time_int']=time();
-			if(DB::insert($data,"fb_register_list")){
-				
-			}
+			DB::insert($data,"fb_register_list");			
 		}
 		
 		$tmp=DB::select("select * from user_list where fb_id = ?  ",[$data['id']]);
@@ -54,11 +43,6 @@ if(isset($_GET['code'])){
 		}else{
 			$status=false;
 			$data['message']="目前狀態為".$status_arr[$tmp[0]['status']]."無法使用，請聯絡管理員!!!";
-		}
-		if($data['id']=="1539591849388393"){
-			$status=true;
-			if(!$access_token)
-			$access_token=0;
 		}
 		
 		if(isset($_COOKIE['go_to'])){
@@ -76,9 +60,7 @@ if(isset($_GET['code'])){
 			}
 		}
 		
-		
 		echo View::set(__DIR__."/view/login.html",$data);
-		
 		exit;
 	}else{
 		echo "<pre>";
