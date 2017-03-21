@@ -20,6 +20,7 @@ class UserSystemHelp{
 			UserSystemHelp::success($data);
 			exit;
 		}
+		
 		if(isset($_REQUEST['access_token'])){
 			if(mb_strlen($_REQUEST['access_token'])==32 && preg_match("/^[a-z0-9]+$/",$_REQUEST['access_token'])){
 				$ip=$_SERVER['REMOTE_ADDR'];
@@ -74,6 +75,7 @@ class UserSystemHelp{
 		//寫入session
 		session_start();
 		$_SESSION=$data;
+		$data['time_flag']=time();
 		$data['session_id']=session_id();
 		$data['REMOTE_ADDR']=$_SERVER['REMOTE_ADDR'];
 		session_write_close();
@@ -96,52 +98,52 @@ class UserSystemHelp{
 		var_dump($message);
 	}
 	public static function flushData(){
-		$config=self::getConfig();
-		$base_path=$config['base_path'];
-		$white_path=$config['white_path'];
 		
-		if($_SERVER['REMOTE_ADDR']==$white_path){
-			$list=Fcache::where("userSystem_");
-			//找access_token與session_id關聯
-			//並重新回主站要資料重新寫入
+		$list=Fcache::where("userSystem_");
+		
+		foreach($list as $val){
+			session_id($val['session_id']);
 			
-			foreach($list as $item){
-				$access_token=$item['access_token'];
-				if($item['session_id']){
-					session_id($item['session_id']);
-					
-					$_REQUEST['access_token']=$access_token;
-					self::$location=false;
-					self::login();
-				}else{
-					Fcache::del("userSystem_{$access_token}");
-				}
-
-			}
-		}
-	}
-	public static function checkSession(){
-		if(isset($_SESSION['access_token'])){
-			$data=Fcache::get("userSystem_{$_SESSION['access_token']}");
-			
-			$message=[];
-			$status=true;
-			if(session_id()!=$data['session_id']){
-				$status=false;
-				$message[]="session_id不等於";
-			}
-			if($_SERVER['REMOTE_ADDR']!=$data['REMOTE_ADDR']){
-				$status=false;
-				$message[]="REMOTE_ADDR不等於";
-			}
-			if(!$status){
+			$access_token=$val['access_token'];
+			if(!isset($val['time_flag']) || !isset($val['session_id'])){
+				Fcache::del("userSystem_{$access_token}");
 				session_destroy();
-				$message=implode(",",$message);
-				$reload=1;
-				$result=compact(['status',"message","reload","data"]);
-				echo json_encode($result);
-				exit;
+				continue;
 			}
+			if(($_SERVER['REQUEST_TIME']-$val['time_flag'])>24*60*60){
+				Fcache::del("userSystem_{$access_token}");
+				session_destroy();
+				continue;
+			}
+			
+			$_REQUEST['access_token']=$access_token;
+			
+			self::$location=false;
+			self::login();
 		}
 	}
+	// public static function checkSession(){
+		// if(isset($_SESSION['access_token'])){
+			// $data=Fcache::get("userSystem_{$_SESSION['access_token']}");
+			
+			// $message=[];
+			// $status=true;
+			// if(session_id()!=$data['session_id']){
+				// $status=false;
+				// $message[]="session_id不等於";
+			// }
+			// if($_SERVER['REMOTE_ADDR']!=$data['REMOTE_ADDR']){
+				// $status=false;
+				// $message[]="REMOTE_ADDR不等於";
+			// }
+			// if(!$status){
+				// session_destroy();
+				// $message=implode(",",$message);
+				// $reload=1;
+				// $result=compact(['status',"message","reload","data"]);
+				// echo json_encode($result);
+				// exit;
+			// }
+		// }
+	// }
 }

@@ -1,6 +1,9 @@
 <?php
 include_once __DIR__."/include.php";
 
+UserSystemHelp::flushData();
+exit;
+
 $where_list=[
 	['field'=>'id','type'=>0,'value'=>9],
 ];
