@@ -47,9 +47,8 @@ class UserSystemHelp{
 			if(is_callable($error) && !$result['status']){
 				call_user_func($error,$result['message']);
 			}
-			
 		}
-		elseif(isset($_REQUEST['error'])){
+		else if(isset($_REQUEST['error'])){
 			if(is_callable($error)){
 				call_user_func($error,$result['error']);
 			}

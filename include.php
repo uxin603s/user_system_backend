@@ -18,7 +18,7 @@ include_once __DIR__."/RoleList.php";
 include_once __DIR__."/DataList.php";
 include_once __DIR__."/RoleData.php";
 include_once __DIR__."/UserRole.php";
-include_once __DIR__."/BlockList.php";
+include_once __DIR__."/IPList.php";
 
 
 $Config=json_decode(file_get_contents(__DIR__."/config.json"),1);
