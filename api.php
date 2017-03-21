@@ -31,13 +31,14 @@ if(isset($white[$_SERVER['REMOTE_ADDR']])){
 
 //白名單直接給最高權限
 //黑名單
+$message_arr=[];
 $status=true;
 if(isset($white[$_SERVER['REMOTE_ADDR']])){
 	$data['rid']=[0];
 	$data['name']=$_SERVER['REMOTE_ADDR'];
 	$status=true;
 	$ip=$_SERVER['REMOTE_ADDR'];
-	
+	$message="白名單";
 	echo json_encode(compact(["status","data","message","ip"]));
 	exit;
 }else if(isset($black[$_SERVER['REMOTE_ADDR']])){
@@ -47,21 +48,19 @@ if(isset($white[$_SERVER['REMOTE_ADDR']])){
 	
 	if($count>3 && $keep_time_int>$_SERVER['REQUEST_TIME']){//被封鎖中
 		$status=false;
-		echo "<pre>";
-		var_dump("錯誤超過3次封鎖");
+		$message_arr[]="錯誤超過3次封鎖";
 	}
 	
 	if($keep_time_int==-1){
-		echo "<pre>";
-		var_dump("永ban");
+		$message_arr[]="永ban";
 		$status=false;
 	}else if($keep_time_int<$_SERVER['REQUEST_TIME']){
 		$where=[];
 		$where["ip"]=$_SERVER['REMOTE_ADDR'];
 		IPList::delete($where);
 		$status=true;
-		echo "<pre>";
-		var_dump("時間過了解除封鎖");
+		$message_arr[]="時間過了解除封鎖";
+		
 	}
 	
 }
@@ -72,31 +71,33 @@ if($status){
 	if(mb_strlen($_GET['access_token'])==32 && preg_match("/^[a-z0-9]+$/",$_GET['access_token'])){
 		$data=UserList::compactUser($_GET['access_token']);
 		$status=true;
-		$message="成功取得資料";
+		$message_arr[]="成功取得資料";
 	}else{
+		$keep_time_int=$_SERVER['REQUEST_TIME']+30*60;
 		if(isset($black[$_SERVER['REMOTE_ADDR']])){
+			$count=$black[$_SERVER['REMOTE_ADDR']]['count'];;
 			$update=[];
-			$update['keep_time_int']=$_SERVER['REQUEST_TIME']+30*60;
-			$update['count']=++$black[$_SERVER['REMOTE_ADDR']]['count'];
+			$update['keep_time_int']=$keep_time_int;
+			$update['count']=++$count;
 			$where=[];
 			$where["ip"]=$_SERVER['REMOTE_ADDR'];
 			IPList::update(compact(["where","update"]));
-			var_dump("count={$black[$_SERVER['REMOTE_ADDR']]['count']}");
 		}else{
+			$count=1;
 			$insert=[];
-			$insert['keep_time_int']=$_SERVER['REQUEST_TIME']+30*60;
-			$insert['count']=1;
+			$insert['keep_time_int']=$keep_time_int;
+			$insert['count']=$count;
 			$insert["ip"]=$_SERVER['REMOTE_ADDR'];
 			IPList::insert($insert);
-			var_dump("count=1");
 		}
 		
 		$status=false;
+		$message_arr[]="嘗試第{$count}次";
 	}
 }
 
 
-
+$message=implode("，",$message_arr);
 $ip=$_SERVER['REMOTE_ADDR'];
 
 echo json_encode(compact(["status","data","message","ip"]));
