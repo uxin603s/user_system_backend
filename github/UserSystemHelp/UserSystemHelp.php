@@ -107,11 +107,13 @@ class UserSystemHelp{
 			$access_token=$val['access_token'];
 			if(!isset($val['time_flag']) || !isset($val['session_id'])){
 				Fcache::del("userSystem_{$access_token}");
-				session_destroy();
-				continue;
+				// session_start();
+				// session_destroy();
+				// continue;
 			}
 			if(($_SERVER['REQUEST_TIME']-$val['time_flag'])>24*60*60){
 				Fcache::del("userSystem_{$access_token}");
+				session_start();
 				session_destroy();
 				continue;
 			}
