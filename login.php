@@ -88,6 +88,7 @@ if(isset($_GET['code'])){
 	}else{
 		echo "<pre>";
 		var_dump($http_response_header);
+		header("location:http://{$_SERVER['HTTP_HOST']}/{$_SERVER['PHP_SELF']}");
 	}
 }else{
 	$scope=urlencode("email");
