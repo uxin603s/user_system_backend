@@ -43,8 +43,11 @@ if(isset($_GET['code'])){
 				if($result['status']){
 					$status_arr=["空缺","在職","離職"];
 					if($result['list'][0]['status']==1){
-						$status=true;
+						// $status=true;
 						$access_token=$result['list'][0]['access_token'];
+						$_REQUEST['access_token']=$access_token;
+						UserSystemHelp::login();
+						exit;
 					}else{
 						$view['message']="";
 						$view['message'].="目前狀態為".$status_arr[$result['list'][0]['status']];
