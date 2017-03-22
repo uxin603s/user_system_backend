@@ -3,8 +3,10 @@ class UserSystemHelp{
 	public static $location=true;
 	public static $local=false;
 	public static $base_path="";
+	public static $success_func="UserSystemHelp::success";
+	public static $error_func="UserSystemHelp::error";
 	
-	public static function login($success="UserSystemHelp::success",$error="UserSystemHelp::error"){		
+	public static function login(){		
 		$base_path=static::$base_path;	
 		if(static::$local){
 			$data['rid']=[0];
@@ -26,8 +28,8 @@ class UserSystemHelp{
 				if($http_code!=200){
 					$result=Fcache::get("userSystem_{$_REQUEST['access_token']}");
 				}
-				if(is_callable($success) && $result['status']){
-					call_user_func($success,$result['data']);
+				if(is_callable(static::$success_func) && $result['status']){
+					return call_user_func(static::$success_func,$result['data']);
 				}
 			}else{
 				$result=[];
@@ -36,13 +38,17 @@ class UserSystemHelp{
 			}
 			setcookie("access_token","",time()-60*60);
 			
-			if(is_callable($error) && !$result['status']){
-				call_user_func($error,$result['message']);
+			if(is_callable(static::$error_func) && !$result['status']){
+				echo $result['message'];
+				return false;
+				// call_user_func(static::$error_func,);
 			}
 		}
 		else if(isset($_REQUEST['error'])){
-			if(is_callable($error)){
-				call_user_func($error,$result['error']);
+			if(is_callable(static::$error_func)){
+				echo $result['message'];
+				return false;
+				// call_user_func(static::$error_func,$result['error']);
 			}
 		}
 		else{
@@ -79,7 +85,7 @@ class UserSystemHelp{
 			header("location: {$go_to}");
 			exit;
 		}
-		
+		return true;
 	}
 	
 	public static function error($message){
@@ -111,8 +117,16 @@ class UserSystemHelp{
 			$_REQUEST['access_token']=$access_token;
 			$_SERVER['REMOTE_ADDR']=$val['REMOTE_ADDR'];
 			self::$location=false;
-			self::login();
-			var_dump("{$_SESSION['name']}刷新資料");
+			if(self::login()){
+				var_dump("{$_SESSION['name']}刷新資料");
+			}else{
+				Fcache::del("userSystem_{$access_token}");
+				session_start();
+				session_destroy();
+				var_dump("access_token已更換");
+				continue;
+			}
+			
 		}
 		echo ob_get_clean();
 	}
@@ -126,12 +140,10 @@ class UserSystemHelp{
 			$remote_addr=$_SERVER['REMOTE_ADDR'];
 			
 			if($session_id!=$data['session_id']){
-				
 				$message[]="session_id不等於";
 			}
 			
 			if($remote_addr!=$data['REMOTE_ADDR']){
-				
 				$message[]="REMOTE_ADDR不等於";
 			}
 			
