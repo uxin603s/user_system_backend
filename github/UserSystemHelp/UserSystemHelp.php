@@ -114,7 +114,7 @@ class UserSystemHelp{
 			self::login();
 			var_dump("{$_SESSION['name']}刷新資料");
 		}
-		echo ob_get_contents();
+		ob_get_contents();
 		
 		
 	}
