@@ -102,7 +102,7 @@ class UserSystemHelp{
 			}
 			if(($_SERVER['REQUEST_TIME']-$val['time_flag'])>24*60*60){
 				Fcache::del("userSystem_{$access_token}");
-				session_start();
+				@session_start();
 				session_destroy();
 				var_dump("到期刪除");
 				continue;
