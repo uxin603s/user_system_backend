@@ -135,7 +135,7 @@ class UserSystemHelp{
 				$message[]="REMOTE_ADDR不等於";
 			}
 			
-			if(!$message){
+			if($message){
 				session_start();
 				session_destroy();
 				$message=implode(",",$message);
