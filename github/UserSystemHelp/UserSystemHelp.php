@@ -64,7 +64,7 @@ class UserSystemHelp{
 		}
 		
 		//寫入session
-		session_start();
+		@session_start();
 		$_SESSION=$data;
 		$data['time_flag']=time();
 		$data['session_id']=session_id();
