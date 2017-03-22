@@ -115,31 +115,35 @@ class UserSystemHelp{
 			var_dump("{$_SESSION['name']}刷新資料");
 		}
 		echo ob_get_clean();
-		
-		
 	}
-	// public static function checkSession(){
-		// if(isset($_SESSION['access_token'])){
-			// $data=Fcache::get("userSystem_{$_SESSION['access_token']}");
+	public static function checkSession(){
+		if(isset($_SESSION['access_token'])){
+			$data=Fcache::get("userSystem_{$_SESSION['access_token']}");
+			$message=[];
 			
-			// $message=[];
-			// $status=true;
-			// if(session_id()!=$data['session_id']){
-				// $status=false;
-				// $message[]="session_id不等於";
-			// }
-			// if($_SERVER['REMOTE_ADDR']!=$data['REMOTE_ADDR']){
-				// $status=false;
-				// $message[]="REMOTE_ADDR不等於";
-			// }
-			// if(!$status){
-				// session_destroy();
-				// $message=implode(",",$message);
-				// $reload=1;
-				// $result=compact(['status',"message","reload","data"]);
-				// echo json_encode($result);
-				// exit;
-			// }
-		// }
-	// }
+			
+			$session_id=session_id();
+			$remote_addr=$_SERVER['REMOTE_ADDR'];
+			
+			if($session_id!=$data['session_id']){
+				
+				$message[]="session_id不等於";
+			}
+			
+			if($remote_addr!=$data['REMOTE_ADDR']){
+				
+				$message[]="REMOTE_ADDR不等於";
+			}
+			
+			if(!$message){
+				session_start();
+				session_destroy();
+				$message=implode(",",$message);
+				$reload=1;
+				$result=compact(['status',"message","reload","data"]);
+				echo json_encode($result);
+				exit;
+			}
+		}
+	}
 }

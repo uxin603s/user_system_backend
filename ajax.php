@@ -7,6 +7,7 @@ session_start();
 if($Config['local']==1){
 	
 }else{
+	UserSystemHelp::checkSession();
 	if(isset($_SESSION['rid']) && in_array(0,$_SESSION['rid'])){
 		
 	}else{
