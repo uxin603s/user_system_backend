@@ -39,16 +39,12 @@ class UserSystemHelp{
 			setcookie("access_token","",time()-60*60);
 			
 			if(is_callable(static::$error_func) && !$result['status']){
-				echo $result['message'];
-				return false;
-				// call_user_func(static::$error_func,);
+				return call_user_func(static::$error_func,$result['message']);
 			}
 		}
 		else if(isset($_REQUEST['error'])){
 			if(is_callable(static::$error_func)){
-				echo $result['message'];
-				return false;
-				// call_user_func(static::$error_func,$result['error']);
+				return call_user_func(static::$error_func,$_REQUEST['error']);
 			}
 		}
 		else{
@@ -89,9 +85,9 @@ class UserSystemHelp{
 	}
 	
 	public static function error($message){
-		return $message;
+		echo $message;
 		// 錯誤頁面顯示
-		var_dump($message);
+		return false;
 	}
 	public static function flushData(){
 		
