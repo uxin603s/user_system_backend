@@ -72,28 +72,18 @@ class UserList{
 	
 	public static function reset_session(){
 		$tmp_session_id=session_id();
-		if($list=Fcache::where("userSystem_")){
-			foreach($list as $val){
-				$access_token=$val['access_token'];
-				$old_data=Fcache::get("userSystem_{$access_token}");
-				$session_id=$val['session_id'];
-				session_id($session_id);
-				session_start();
-				$_SESSION=self::compactUser($access_token);
-				$_SESSION['session_id']=$session_id;
-				$_SESSION['REMOTE_ADDR']=$old_data['REMOTE_ADDR'];
-				Fcache::set("userSystem_{$access_token}",$_SESSION);
-				session_write_close();
-			}
-		}
+		$tmp_remote_addr=$_SERVER['REMOTE_ADDR'];
+		UserSystemHelp::flushData();
 		
-		if($tmp_session_id){
+		if($tmp_session_id){//還原
 			session_id($tmp_session_id);
+			$_SERVER['REMOTE_ADDR']=$tmp_remote_addr;
 			session_start();
 			session_write_close();
 		}
 		
 		ob_start();
+		//刷新網站
 		system("/usr/bin/nohup /usr/bin/curl http://tag.cfd888.info/flush_auth.php > /dev/null 2>&1 & ");
 		system("/usr/bin/nohup /usr/bin/curl http://fans.cfd888.info/flush_auth.php > /dev/null 2>&1 & ");
 		ob_get_contents();
