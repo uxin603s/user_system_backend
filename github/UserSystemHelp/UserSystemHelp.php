@@ -54,15 +54,6 @@ class UserSystemHelp{
 	public static function success($data){
 		
 		$access_token=$data['access_token'];
-		
-		if($data['go_to'] && is_numeric(strpos("http://{$_SERVER['HTTP_HOST']}",$data['go_to']))){
-			$go_to=$data['go_to'];
-		}else if($_COOKIE['go_to']){
-			$go_to=$_COOKIE['go_to'];
-		}else{
-			$go_to="index.php";
-		}
-		
 		//寫入session
 		session_start();
 		$_SESSION=$data;
@@ -77,6 +68,14 @@ class UserSystemHelp{
 		setcookie("access_token",$access_token,time()+60*60);
 		//data找導頁資料並導頁
 		if(self::$location){
+			if($data['go_to'] && is_numeric(strpos("http://{$_SERVER['HTTP_HOST']}",$data['go_to']))){
+				$go_to=$data['go_to'];
+			}else if($_COOKIE['go_to']){
+				$go_to=$_COOKIE['go_to'];
+			}else{
+				$go_to="index.php";
+			}
+			
 			header("location: {$go_to}");
 			exit;
 		}
@@ -110,6 +109,7 @@ class UserSystemHelp{
 			}
 			
 			$_REQUEST['access_token']=$access_token;
+			$_SERVER['REMOTE_ADDR']=$val['REMOTE_ADDR'];
 			self::$location=false;
 			self::login();
 			var_dump("{$_SESSION['name']}刷新資料");
