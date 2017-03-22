@@ -64,7 +64,7 @@ class UserSystemHelp{
 		}
 		
 		//寫入session
-		@session_start();
+		session_start();
 		$_SESSION=$data;
 		$data['time_flag']=time();
 		$data['session_id']=session_id();
@@ -91,6 +91,7 @@ class UserSystemHelp{
 	public static function flushData(){
 		
 		$list=Fcache::where("userSystem_");
+		ob_start();
 		var_dump($list);
 		foreach($list as $key=>$val){
 			session_id($val['session_id']);
@@ -102,7 +103,7 @@ class UserSystemHelp{
 			}
 			if(($_SERVER['REQUEST_TIME']-$val['time_flag'])>24*60*60){
 				Fcache::del("userSystem_{$access_token}");
-				@session_start();
+				session_start();
 				session_destroy();
 				var_dump("到期刪除");
 				continue;
@@ -113,6 +114,8 @@ class UserSystemHelp{
 			self::login();
 			var_dump("{$_SESSION['name']}刷新資料");
 		}
+		echo ob_get_contents();
+		
 		
 	}
 	// public static function checkSession(){
