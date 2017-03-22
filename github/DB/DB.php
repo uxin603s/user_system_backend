@@ -5,19 +5,21 @@ class DB{
 	public static $config=[];
 	
 	private function __construct(){
-		self::$config=json_decode(file_get_contents(__DIR__."/config.json"),1);
+		if(file_exists(__DIR__."/config.json")){
+			self::$config=json_decode(file_get_contents(__DIR__."/config.json"),1);
+		}
 		$dbName=self::$config['dbName'];
 		$user=self::$config['user'];
 		$password=self::$config['password'];
 		$host=self::$config['host'];
-		$config=[
-			PDO::ATTR_PERSISTENT => true,//持久連線(初始化就要使用不然會無效)
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-			// PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING,
-		];
+		
 		$pdo_string="mysql:host={$host};dbname={$dbName}";
 		try{	
-			self::$connect=new PDO($pdo_string,$user,$password,$config);
+			self::$connect=new PDO($pdo_string,$user,$password,[
+				PDO::ATTR_PERSISTENT => true,//持久連線(初始化就要使用不然會無效)
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				// PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING,
+			]);
 		}catch(PDOException $e){  
 			error_log($e);//getMessage,getTrace
 			exit;

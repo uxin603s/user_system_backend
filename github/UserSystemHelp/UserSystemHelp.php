@@ -2,20 +2,11 @@
 class UserSystemHelp{
 	public static $location=true;
 	public static $local=false;
-	public static function getConfig(){
-		$path=__DIR__."/config.json";
-		if(file_exists($path)){
-			return json_decode(file_get_contents($path),1);
-		}else{
-			throw new Exception("config不存在");
-		}
-	}
-	public static function login($success="UserSystemHelp::success",$error="UserSystemHelp::error"){
-		$config=self::getConfig();
-		$base_path=$config['base_path'];
-		$white_path=$config['white_path'];
-		
-		if(self::$local){
+	public static $base_path="";
+	
+	public static function login($success="UserSystemHelp::success",$error="UserSystemHelp::error"){		
+		$base_path=static::$base_path;	
+		if(static::$local){
 			$data['rid']=[0];
 			UserSystemHelp::success($data);
 			exit;
@@ -100,29 +91,29 @@ class UserSystemHelp{
 	public static function flushData(){
 		
 		$list=Fcache::where("userSystem_");
-		
-		foreach($list as $val){
+		var_dump($list);
+		foreach($list as $key=>$val){
 			session_id($val['session_id']);
 			
 			$access_token=$val['access_token'];
 			if(!isset($val['time_flag']) || !isset($val['session_id'])){
 				Fcache::del("userSystem_{$access_token}");
-				// session_start();
-				// session_destroy();
-				// continue;
+				var_dump("刪除舊資料");
 			}
 			if(($_SERVER['REQUEST_TIME']-$val['time_flag'])>24*60*60){
 				Fcache::del("userSystem_{$access_token}");
 				session_start();
 				session_destroy();
+				var_dump("到期刪除");
 				continue;
 			}
 			
 			$_REQUEST['access_token']=$access_token;
-			
 			self::$location=false;
 			self::login();
+			var_dump("{$_SESSION['name']}刷新資料");
 		}
+		
 	}
 	// public static function checkSession(){
 		// if(isset($_SESSION['access_token'])){

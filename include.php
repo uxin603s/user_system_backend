@@ -20,7 +20,10 @@ include_once __DIR__."/RoleData.php";
 include_once __DIR__."/UserRole.php";
 include_once __DIR__."/IPList.php";
 
-
 $Config=json_decode(file_get_contents(__DIR__."/config.json"),1);
-
+UserSystemHelp::$base_path=$Config['base_path'];
 Mcache::$prefix=$Config["Mcache.prefix"];
+DB::$config['dbName']=$Config["dbName"];
+DB::$config['user']=$Config["user"];
+DB::$config['password']=$Config["password"];
+DB::$config['host']=$Config["host"];
