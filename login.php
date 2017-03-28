@@ -17,11 +17,12 @@ $redirect_uri=urlencode($redirect_uri);
 if(isset($_GET['code'])){	
 	$url="https://graph.facebook.com/oauth/access_token?client_id={$client_id}&client_secret={$client_secret}&code={$_GET['code']}&redirect_uri={$redirect_uri}";
 	ob_start();
-	$access_token=file_get_contents($url);
+	$result=json_decode(file_get_contents($url),1);
+	$access_token=$result['access_token'];
 	ob_get_clean();
 		
 	if($access_token){
-		$url="https://graph.facebook.com/me?fields=id,name,gender,email&".$access_token;
+		$url="https://graph.facebook.com/me?fields=id,name,gender,email&access_token=".$access_token;
 		ob_start();
 		$json=file_get_contents($url);
 		ob_get_clean();
